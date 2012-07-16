@@ -189,7 +189,7 @@ function New-ZipFile
       (Test-Path $_) -and (!$_.PSIsContainer) -and
       ($_.Name -ieq 'Ionic.Zip.dll')
     })]
-    $DotNetZipPath = Get-DotNetZipPath
+    $DotNetZipPath = (Get-DotNetZipPath)
   )
 
   #TODO - this is quite yucky for now
