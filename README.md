@@ -1,5 +1,6 @@
-Midori
-======
+![Logo](https://github.com/EastPoint/Midori/raw/master/logo-128.png)
+
+# Midori
 
 A set of Powershell modules for sweetening [Psake](https://github.com/psake/psake).
 
@@ -7,8 +8,7 @@ Enhances Psake with some commonly needed functionality when using a build server
 such as Jenkins.  Useful not only for any build or continuous delivery system,
 but also in other scenarios where PowerShell scripts are used for maintenance.
 
-Using with Psake
-====
+## Using with Psake
 
 These modules may be imported by modifing the `psake-config.ps1` and adding
 something like
@@ -17,8 +17,13 @@ something like
 $config.modules=(".\packages\Midori\tools\*.psm1")
 ```
 
+The recommendation is to bootstrap the build process before passing control over
+to Psake.  Typically this is used to configure the environment, add standard
+tool paths to the system path, and make certain that any other build
+dependencies are installed and/or configured.
+
 A standard `build.ps1` (included in the tools directory for convenience) that
-bootstraps VsVars32.bat, Nuget and Psake looks like:
+bootstraps VsVars32.bat, Nuget and Psake might look like:
 
 ```powershell
 function Get-Batchfile ($file)
@@ -81,9 +86,7 @@ $host.UI.RawUI.BufferSize = New-Object Management.Automation.Host.Size(512,80)
 Invoke-psake default
 ```
 
-Included Modules
-====
-
+## Included Modules
 
 * BuildTools - A set of helpers for common build related tasks
     * `Invoke-AuthenticodeSignTool` - Will find signtool.exe based on common locations
@@ -151,8 +154,7 @@ setting up integration tests or similar.
     delimiter are perfectly acceptable here.
     * `Invoke-SqlFileSmo`
 
-Future Improvements
-===
+### Future Improvements
 
 Next in the pipeline -
 
@@ -170,8 +172,7 @@ they just need to be ported over.  The MSBuild scripts became a bit difficult
 to share and unwiedly, hence the port to PSake where they can become more modular
 and easier to use / share.
 
-Credits
-===
+### Credits
 
 * Of course, [James Kovacs](https://github.com/JamesKovacs) needs a big THANK YOU
 for creating a reasonable build system for .NET.  I struggled with bending
@@ -184,8 +185,7 @@ Builds have a much better mapping to procedural code, and Psake brings sanity to
 the .NET world.
 * The icon was derived from the Creative Commons image by David Peters [here](http://commons.wikimedia.org/wiki/File:Cocktail-icon.svg)
 
-Contributions
-===
+#### Contributions
 
 If you see something wrong, feel free to submit a pull request.
 Coding guidelines are :
