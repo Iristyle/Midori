@@ -18,7 +18,7 @@ function Set-DotNetZipPath
   #>
   param (
     [Parameter(Mandatory=$true)]
-    [FileInfo]
+    [IO.FileInfo]
     [ValidateScript(
     {
       (Test-Path $_) -and (!$_.PSIsContainer) -and
@@ -184,7 +184,7 @@ function New-ZipFile
     $Root,
 
     [Parameter(Mandatory=$false)]
-    [FileInfo]
+    [IO.FileInfo]
     [ValidateScript({
       (Test-Path $_) -and (!$_.PSIsContainer) -and
       ($_.Name -ieq 'Ionic.Zip.dll')
