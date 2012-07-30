@@ -96,11 +96,12 @@ function Remove-Error
     $ErrorCollection=$global:Error,
 
     [Parameter(Mandatory=$true)]
+    [ValidateRange(0, 2147483647)]
     [int]
     $Count
   )
 
-  if ($ErrorCollection.Count -eq 0) { return }
+  if (($ErrorCollection.Count -eq 0) -or ($Count -eq 0)) { return }
 
   $toStrip = $Count
   if ($toStrip -gt $ErrorCollection.Count)
