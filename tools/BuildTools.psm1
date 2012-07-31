@@ -44,6 +44,8 @@ function Get-DotNetZipPath
   $script:DotNetZipVersionPath =
     Get-ChildItem -Path $parentDirectory -Filter 'Ionic.Zip.dll' -Recurse |
     ? { $_.DirectoryName.EndsWith('net20') } | Select -First 1 -ExpandProperty FullName
+
+  return $script:DotNetZipVersionPath
 }
 
 function Invoke-AuthenticodeSignTool
