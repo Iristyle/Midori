@@ -147,7 +147,8 @@ function New-ZipFile
     Will create a new zip file or add to an existing one given a specific
     name.
 
-    If the DotNetZipPath is not specified, it will be resolve
+    If the DotNetZipPath is not specified, it will be resolved by
+    searching sibling directories.
   .Parameter Path
     The file name to write out.
   .Parameter SourceFiles
