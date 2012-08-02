@@ -73,7 +73,7 @@ $buildPackageDir = Join-Path (Get-CurrentDirectory) 'packages'
 $sourcePackageDir = Join-Path (Get-CurrentDirectory) '..\src\Packages'
 
 @(@{Id = 'psake'; Version='4.2.0.1'; Dir = $buildPackageDir; NoVersion = $true },
-  @{Id = 'Midori'; Version='0.1.0.0'; Dir = $buildPackageDir; NoVersion = $true },
+  @{Id = 'Midori'; Version='0.2.0.0'; Dir = $buildPackageDir; NoVersion = $true },
   @{Id = 'DotNetZip'; Version='1.9.1.8'; Dir = $buildPackageDir; NoVersion = $true }) |
   % {
     $versionSwitch = if ($_.NoVersion) {'-ExcludeVersion'} else { '' }
@@ -82,8 +82,12 @@ $sourcePackageDir = Join-Path (Get-CurrentDirectory) '..\src\Packages'
 
 Remove-Module psake -erroraction silentlycontinue
 Import-Module (Join-Path $buildPackageDir 'psake\tools\psake.psm1')
-$host.UI.RawUI.BufferSize = New-Object Management.Automation.Host.Size(512,80)
+$bufferSize = $host.UI.RawUI.BufferSize
+$newBufferSize = New-Object Management.Automation.Host.Size(512,
+  $bufferSize.Height)
+$host.UI.RawUI.BufferSize = $newBufferSize
 Invoke-psake default
+$host.UI.RawUI.BufferSize = $bufferSize
 ```
 
 ## Included Modules
@@ -99,6 +103,15 @@ Invoke-psake default
 * HipChat
     * `Send-HipChatNotification` - Given the current HipChat token, can send
     info to a given chat room, including specifying colors, etc.
+* XUnit
+    * `Invoke-XUnit` - Will create a temporary .xunit file, will execute XUnit
+    against it, and will write results Xml to disk, automatically merging NUnit
+    style output, so that it may be easily used with, for instance, the
+    [Jenkins xUnit Plugin](https://wiki.jenkins-ci.org/display/JENKINS/xUnit+Plugin)
+    * `New-XUnitProjectFile` - Will create a .xunit project file given a list of
+    assemblies, and a given output format.  Called automatically by `Invoke-XUnit`
+    * `New-MergedNUnitXml` - Merges NUnit specific format into a single file,
+    summarizing the result information.  Called automatically by `Invoke-XUnit`
 * Jenkins
     * `Get-JenkinsS3Build` - Will use a Jenkins job name and either a specific
     integer build id or will use the REST api and a given build result, to
@@ -127,6 +140,8 @@ Invoke-psake default
     since TimeSpan.Format is a .NET 4 facility.
     * `Get-SimpleErrorRecord` - Will create a Management.Automation.ErrorRecord
     given just a text string (by creating a dummy Exception)
+    * `Compare-Hash` - Will return a `$true` or `$false` value when comparing
+    two Powershell hash objects - `Compare-Hash @${Key = Value;} @${Key = Value;}`
 * PsGet-Loader - Some helpers for [PsGet](http://psget.net/)
     * `Install-PsGet` - Will install PsGet to the current user module directory.
     * `Install-CommunityExtensions` - Will install the [PsCx](http://pscx.codeplex.com/), first ensuring that
@@ -154,14 +169,17 @@ setting up integration tests or similar.
     delimiter are perfectly acceptable here.
     * `Invoke-SqlFileSmo`
 
+### Release Notes
+
+* 0.2.0.0 - Added [XUnit.NET](http://xunit.codeplex.com/) support
+* 0.1.0.0 - Initial release
+
 ### Future Improvements
 
 Next in the pipeline -
 
 * Fleshing out Pester tests in a few spots where applicable - some things are
 quite difficult to test easily since they are dependent on external systems
-
-* [XUnit.NET](http://xunit.codeplex.com/) - Find Xunit assemblies based on .Tests convention and run them
 * [NCover](http://www.ncover.com/) - Run Xunit tests under NCover to generate coverage reports
 * [NDepend](http://www.ndepend.com/) - Run the popular dependency analysis tool
 * [Gendarme](http://www.mono-project.com/Gendarme) - Run the Mono static analysis tool (IMHO, better than FxCop)

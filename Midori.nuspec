@@ -2,7 +2,7 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Midori</id>
-    <version>0.1.0.4</version>
+    <version>0.2.0.0</version>
     <title>Midori - Sweeter Psake builds</title>
     <authors>Ethan Brown</authors>
     <owners>Ethan Brown</owners>
@@ -15,11 +15,12 @@
         * PsGet - Install PsGet and gain access to libraries such as PsCx
         * WinRM - Run code on remote servers, by exporting local PSM1 modules to remote machines
         * Jenkins - Download assets stored in S3
+        * XUnit - Runs xunit tests and merges nunit output files for build servers, can create standalone xunit project files
         * Misc helpers - Safer transcription, better error logging, and other common usage helpers
     </description>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <releaseNotes>
-        * First release - includes Jenkins build asset downloading, SQL SMO db creation, HipChat notifications, WinRM module import helpers, PSGet integration, etc.
+        * 0.2.0.0 includes support for XUnit project creation and test execution!
         </releaseNotes>
     <projectUrl>https://github.com/EastPoint/Midori</projectUrl>
     <licenseUrl>https://github.com/EastPoint/Midori/blob/master/LICENSE.md</licenseUrl>
