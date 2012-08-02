@@ -1,3 +1,55 @@
+function Compare-Hash
+{
+  <#
+  .Synopsis
+    Compares two Hashtable objects based on their key / value pairs.
+
+    Does not suport nested Hashtables.
+  .Description
+    Accepts two Hashtable objects, and returns $true if their k/v pairs
+    match, or $false otherwise.
+  .Parameter ReferenceObject
+    The original object to compare
+  .Parameter DifferenceObject
+    The second object
+  .Example
+    Compare-Hash @{A = 1} @{A = 2}
+
+    Returns $false
+  .Example
+    Compare-Hash @{A = 1; B = 2; } @{B = 2; A = 1;}
+
+    Returns $true
+  #>
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory=$true, Position=0)]
+    [Hashtable]
+    [Alias("Ref")]
+    [ValidateNotNull()]
+    $ReferenceObject,
+
+    [Parameter(Mandatory=$true, Position=1)]
+    [Hashtable]
+    [Alias("Diff")]
+    [ValidateNotNull()]
+    $DifferenceObject
+  )
+
+  if ($ReferenceObject.Count -ne $DifferenceObject.Count)
+  { return $false }
+
+  $params = @{
+    ReferenceObject = $ReferenceObject.GetEnumerator() |
+      % {$_.Key + " - " + $_.Value};
+    DifferenceObject = $DifferenceObject.GetEnumerator() |
+      % {$_.Key + " - " + $_.Value};
+  }
+
+  $results = Compare-Object @params
+  if ($results -eq $null) { $true } else { $false }
+}
+
 function Get-TimeSpanFormatted
 {
   <#
@@ -479,4 +531,4 @@ function Start-TempFileTranscriptSafe
 Export-ModuleMember -Function Stop-TranscriptSafe, Select-ObjectWithDefault,
   Resolve-Error, Get-CredentialPlain, Test-TranscriptionSupported,
   Test-Transcribing, Remove-Error, Start-TempFileTranscriptSafe,
-  Get-TimeSpanFormatted, Get-SimpleErrorRecord
+  Get-TimeSpanFormatted, Get-SimpleErrorRecord, Compare-Hash
