@@ -45,7 +45,7 @@ $buildPackageDir = Join-Path (Get-CurrentDirectory) 'packages'
 $sourcePackageDir = Join-Path (Get-CurrentDirectory) '..\src\Packages'
 
 @(@{Id = 'psake'; Version='4.2.0.1'; Dir = $buildPackageDir; NoVersion = $true },
-  @{Id = 'Midori'; Version='0.2.0.0'; Dir = $buildPackageDir; NoVersion = $true },
+  @{Id = 'Midori'; Version='0.3.0.0'; Dir = $buildPackageDir; NoVersion = $true },
   @{Id = 'DotNetZip'; Version='1.9.1.8'; Dir = $buildPackageDir; NoVersion = $true }) |
   % {
     $versionSwitch = if ($_.NoVersion) {'-ExcludeVersion'} else { '' }
