@@ -2,7 +2,7 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Midori</id>
-    <version>0.2.0.0</version>
+    <version>0.3.0.0</version>
     <title>Midori - Sweeter Psake builds</title>
     <authors>Ethan Brown</authors>
     <owners>Ethan Brown</owners>
@@ -10,7 +10,7 @@
         server, SQL database creation and script-running, HipChat notifications,
         PsGet integration PsGet, WinRM helpers and a number of misc PS tasks.</summary>
     <description>Midori includes a number of helpers for common functionality needed during builds, including:
-        * Sql - Create dbs with SMO, execute SQL scripts. Ship MDBs as part of a build, or run intgration tests against a fresh DB.
+        * Sql - Create dbs with SMO, execute SQL scripts, backup / restore and copy MDBs. Ship MDBs as part of a build, or run intgration tests against a fresh DB.
         * HipChat - send notifications
         * PsGet - Install PsGet and gain access to libraries such as PsCx
         * WinRM - Run code on remote servers, by exporting local PSM1 modules to remote machines
@@ -20,6 +20,8 @@
     </description>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <releaseNotes>
+        * 0.3.0.0 includes support for backup/restore and transfer of SQL dbs,
+        minor zip tweaks
         * 0.2.0.0 includes support for XUnit project creation and test execution!
         </releaseNotes>
     <projectUrl>https://github.com/EastPoint/Midori</projectUrl>

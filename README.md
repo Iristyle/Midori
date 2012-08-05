@@ -165,12 +165,27 @@ setting up integration tests or similar.
     * `New-SqlDatabase` - Creates a new database using SMO.  By default, SMO v10
     is searched for and imported.  The database can be detached afterwards, to
     ship with the build assets for instance, or the -NoDetach flag can be used
-    to keep the database around afterwards.  SMO style text files with the `GO`
+    to keep the database around afterwards.  SMO style scripts with the `GO`
     delimiter are perfectly acceptable here.
-    * `Invoke-SqlFileSmo`
+    * `Invoke-SqlFileSmo` - Executes a SQL script file against a SQL Server.
+    SMO style scripts with the `GO` delimiter are perfectly acceptable here.
+    * `Remove-SqlDatabase` - Synonymous with 'Detach' - doesn't delete files
+    from disk.
+    * `Transfer-SqlDatabase` - Uses SMO transfer objects to create a backup
+    copy of a live database.  Slower, but safer (typically not needed in a build
+    server sceario)
+    * `Backup-SqlDatabase` - Creates a full database backup using SMO, to a .bak
+    file
+    * `Restore-SqlDatabase` - Restores a .bak file to a new database, providing
+    the ability to rename both the files and database itself.
+    * `Copy-SqlDatabase` - Provides either a backup/restore of an existing
+    database, or a transfer.  By default, provides the simpler backup/restore
+    which is generally all that would ever be necessary on a build server.
 
 ### Release Notes
 
+* 0.3.0.0 - After much trial and error, added additional Sql cmdlets for backup/
+restore, transfer, and detachment.  Minor tweaks to zip functionality / output.
 * 0.2.0.0 - Added [XUnit.NET](http://xunit.codeplex.com/) support
 * 0.1.0.0 - Initial release
 
