@@ -209,6 +209,7 @@ function New-ZipFile
     { $zip = [Ionic.Zip.ZipFile]::Read($Path) }
 
   "Adding $($SourceFiles.Length) files to archive $Path"
+  $paths = @{}
   $SourceFiles |
   % {
     $destination = $_.DirectoryName
@@ -221,9 +222,20 @@ function New-ZipFile
         $destination = $destination.Substring($Root.Length)
       }
     }
-    [Void]$zip.AddFile($_.FullName, $destination)
-    "Added File $_"
+    if (-not $paths.ContainsKey($destination))
+    {
+      $paths[$destination] = @()
+    }
+    $paths.$destination += $_.FullName
   }
+
+  $paths.GetEnumerator() |
+    %{
+      $files = $_.Value -join "`n"
+      "Adding files to directory $($_.Key):`n`n $files"
+      [Void]$zip.AddFiles([string[]]($_.Value), $_.Key)
+    }
+
   $zip.Save($Path)
   $zip.Dispose()
   "Wrote $($SourceFiles.Length) files to archive $Path"
