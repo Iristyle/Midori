@@ -204,7 +204,7 @@ function New-SqlDatabase
 
     $primaryFileGroup.Files.Add($datafile)
 
-    Write-Host "Added PRIMARY filegroup [$dbFilePath] to database..."
+    Write-Host "Added PRIMARY filegroup [$dbFile] to database..."
 
     if ($CustomizationCallback)
     {
@@ -230,10 +230,14 @@ function New-SqlDatabase
   }
   finally
   {
-    if ($server -and $DatabaseName -and (-not $NoDetach))
+    if ($server)
     {
-      #$database.TruncateLog() -- only works on 2005 or earlier
-      $server.DetachDatabase($DatabaseName, $true)
+      if ($DatabaseName -and (-not $NoDetach))
+      {
+        #$database.TruncateLog() -- only works on 2005 or earlier
+        $server.DetachDatabase($DatabaseName, $true)
+      }
+      $server.ConnectionContext.Disconnect()
     }
   }
 }
@@ -300,25 +304,32 @@ function Backup-SqlDatabase
     $InstanceName = '.\SQLEXPRESS'
   )
 
-  $backupFilePath = "$BackupPath\$DatabaseName.bak"
+  try
+  {
+    $backupFilePath = "$BackupPath\$DatabaseName.bak"
 
-  $server = New-Object Microsoft.SqlServer.Management.Smo.Server($InstanceName)
-  $smoBackup = New-Object Microsoft.SqlServer.Management.Smo.Backup
+    $server = New-Object Microsoft.SqlServer.Management.Smo.Server($InstanceName)
+    $smoBackup = New-Object Microsoft.SqlServer.Management.Smo.Backup
 
-  $smoBackup.Action =
-    [Microsoft.SqlServer.Management.Smo.BackupActionType]::Database
-  $smoBackup.BackupSetDescription = "Full Backup of $DatabaseName"
-  $smoBackup.BackupSetName = "$DatabaseName Backup"
-  $smoBackup.Database = $DatabaseName
-  $smoBackup.Incremental = $false
-  $smoBackup.LogTruncation =
-    [Microsoft.SqlServer.Management.Smo.BackupTruncateLogType]::Truncate
-  $smoBackup.Devices.AddDevice($backupFilePath,
-    [Microsoft.SqlServer.Management.Smo.DeviceType]::File)
-  Write-Host "Generating [$backupFilePath] for [$DatabaseName]"
-  $smoBackup.SqlBackup($server)
+    $smoBackup.Action =
+      [Microsoft.SqlServer.Management.Smo.BackupActionType]::Database
+    $smoBackup.BackupSetDescription = "Full Backup of $DatabaseName"
+    $smoBackup.BackupSetName = "$DatabaseName Backup"
+    $smoBackup.Database = $DatabaseName
+    $smoBackup.Incremental = $false
+    $smoBackup.LogTruncation =
+      [Microsoft.SqlServer.Management.Smo.BackupTruncateLogType]::Truncate
+    $smoBackup.Devices.AddDevice($backupFilePath,
+      [Microsoft.SqlServer.Management.Smo.DeviceType]::File)
+    Write-Host "Generating [$backupFilePath] for [$DatabaseName]"
+    $smoBackup.SqlBackup($server)
 
-  return $backupFilePath
+    return $backupFilePath
+  }
+  finally
+  {
+    if ($server) { $server.ConnectionContext.Disconnect() }
+  }
 }
 
 function Restore-SqlDatabase
@@ -451,9 +462,13 @@ function Restore-SqlDatabase
   }
   finally
   {
-    if ($server -and $DestinationDatabaseName -and (-not $NoDetach))
+    if ($server)
     {
-      $server.DetachDatabase($DestinationDatabaseName, $true)
+      if ($DestinationDatabaseName -and (-not $NoDetach))
+      {
+        $server.DetachDatabase($DestinationDatabaseName, $true)
+      }
+      $server.ConnectionContext.Disconnect()
     }
   }
 }
@@ -636,9 +651,13 @@ function Transfer-SqlDatabase
   }
   finally
   {
-    if ($server -and $DestinationDatabaseName -and (-not $NoDetach))
+    if ($server)
     {
-      $server.DetachDatabase($DestinationDatabaseName, $true)
+      if ($DestinationDatabaseName -and (-not $NoDetach))
+      {
+        $server.DetachDatabase($DestinationDatabaseName, $true)
+      }
+      $server.ConnectionContext.Disconnect()
     }
   }
 }
@@ -795,8 +814,15 @@ function Remove-SqlDatabase
   Start-ServiceAndWait $ServiceName
 
   Write-Host "Detaching $DatabaseName from $InstanceName"
-  $server = New-Object Microsoft.SqlServer.Management.Smo.Server($InstanceName)
-  $server.DetachDatabase($DatabaseName, $true)
+  try
+  {
+    $server = New-Object Microsoft.SqlServer.Management.Smo.Server($InstanceName)
+    $server.DetachDatabase($DatabaseName, $true)
+  }
+  finally
+  {
+    if ($server) { $server.ConnectionContext.Disconnect() }
+  }
 }
 
 function Invoke-SqlFileSmo
@@ -971,6 +997,7 @@ function Invoke-SqlFileSmo
         ? { $_ -ne $null } |
         % { Unregister-Event -SubscriptionId $_ }
     }
+    if ($server) { $server.ConnectionContext.Disconnect() }
   }
 }
 
