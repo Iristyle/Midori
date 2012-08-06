@@ -45,12 +45,36 @@ $buildPackageDir = Join-Path (Get-CurrentDirectory) 'packages'
 $sourcePackageDir = Join-Path (Get-CurrentDirectory) '..\src\Packages'
 
 @(@{Id = 'psake'; Version='4.2.0.1'; Dir = $buildPackageDir; NoVersion = $true },
-  @{Id = 'Midori'; Version='0.3.0.0'; Dir = $buildPackageDir; NoVersion = $true },
-  @{Id = 'DotNetZip'; Version='1.9.1.8'; Dir = $buildPackageDir; NoVersion = $true }) |
+  @{Id = 'Midori'; Version='0.4.0.0'; Dir = $buildPackageDir; NoVersion = $true },
+  #still require dotnetZip to extract the 7-zip command line, sigh
+  @{Id = 'DotNetZip'; Version='1.9.1.8'; Dir = $buildPackageDir; NoVersion = $true },
+  @{Id = 'xunit.runners'; Version='1.9.1'; Dir = $buildPackageDir; NoVersion = $true }) |
   % {
-    $versionSwitch = if ($_.NoVersion) {'-ExcludeVersion'} else { '' }
-    &.\nuget install "$($_.Id)" -v "$($_.Version)" -o `""$($_.Dir)"`" "$versionSwitch"
+    $nuget = @('install', "$($_.Id)", '-v', "$($_.Version)",
+      '-o', "`"$($_.Dir)`"")
+    if (-not ([string]::IsNullOrEmpty($_.Source)))
+      { $nuget += '-s', "`"$($_.Source)`"" }
+    if ($_.NoVersion) { $nuget += '-ExcludeVersion' }
+    &.\nuget $nuget
   }
+
+#Use DotNetZip to Extract 7za.exe, since shell expansion isn't in Server Core
+$7zOutputPath = Join-Path $buildPackageDir '7zip'
+$7zFilePath = Join-Path $7zOutputPath '7za920.zip'
+if (-not (Test-Path $7zFilePath))
+{
+  $7zUrl = 'http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/7za920.zip?use_mirror=autoselect'
+
+  New-Item $7zOutputPath -Type Directory | Out-Null
+  (New-Object Net.WebClient).DownloadFile($7zUrl, $7zFilePath)
+  $dnZipPath = Get-ChildItem $buildPackageDir -Recurse -Filter 'Ionic.zip.dll' |
+    Select -ExpandProperty FullName -First 1
+  Add-Type -Path $dnZipPath
+
+  $zip = [Ionic.Zip.ZipFile]::Read($7zFilePath)
+  $zip['7za.exe'].Extract($7zOutputPath)
+  $zip.Dispose()
+}
 
 Remove-Module psake -erroraction silentlycontinue
 Import-Module (Join-Path $buildPackageDir 'psake\tools\psake.psm1')
