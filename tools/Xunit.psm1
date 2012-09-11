@@ -249,7 +249,7 @@ function Merge-Docs
     $result, $time, $asserts = 'Success', 0.0, 0
     $Assemblies |
     % {
-      if (($_.result -eq 'Failure') -or ($result = 'Failure'))
+      if (($_.result -eq 'Failure') -or ($result -eq 'Failure'))
         { $result = 'Failure' }
       elseif (($_.result -eq 'Inconclusive') -and ($result -eq 'Success'))
         { $result = 'Inconclusive' }
