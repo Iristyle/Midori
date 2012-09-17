@@ -81,7 +81,7 @@ $buildPackageDir = Join-Path (Get-CurrentDirectory) 'packages'
 $sourcePackageDir = Join-Path (Get-CurrentDirectory) '..\src\Packages'
 
 @(@{Id = 'psake'; Version='4.2.0.1'; Dir = $buildPackageDir; NoVersion = $true },
-  @{Id = 'Midori'; Version='0.4.0.0'; Dir = $buildPackageDir; NoVersion = $true },
+  @{Id = 'Midori'; Version='0.4.1.0'; Dir = $buildPackageDir; NoVersion = $true },
   #still require dotnetZip to extract the 7-zip command line, sigh
   @{Id = 'DotNetZip'; Version='1.9.1.8'; Dir = $buildPackageDir; NoVersion = $true },
   @{Id = 'xunit.runners'; Version='1.9.1'; Dir = $buildPackageDir; NoVersion = $true }) |
@@ -216,6 +216,10 @@ setting up integration tests or similar.
 
 ### Release Notes
 
+* 0.4.1.0 - Minor release fixes a bug in XUnit cmdlet that merges output
+Improved Add-AnnotatedContent so that it now has an -Include switch to
+limit the extensions of the given files to concatenate
+Fixed Add-AnnotatedContent so that it doesn't have to be run in Pipeline
 * 0.4.0.0 - Reworked zipping support so that it uses 7z.exe/7za.exe behind
 the scenes instead of DotNetZip as there were performance / memory issues with
 DotNetZip being used inside of PowerShell.  All SMO server connections Disconnect()
