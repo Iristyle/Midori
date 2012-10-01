@@ -325,7 +325,7 @@ function New-MergedNUnitXml
   $files = Get-Item -Path $Path -ErrorAction SilentlyContinue |
     % { [Xml](Get-Content $_) }
 
-  if ($files.Count -eq 0)
+  if (($files -eq $null) -or ($files.Count -eq 0))
     { throw "No input files could be found for merging" }
 
   Write-Host "Merging $($files.Count) nunit results into file: $($Destination)"

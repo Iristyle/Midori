@@ -891,7 +891,10 @@ function Invoke-SqlFileSmo
 
     [Parameter(Mandatory=$false)]
     $Width = { if ($Host -and $Host.UI -and $Host.UI.RawUI)
-      { $Host.UI.RawUI.BufferSize.Width } else { 80 }}
+      { $Host.UI.RawUI.BufferSize.Width } else { 80 }},
+
+    [string]
+    $InstanceName = 'Blarf'
   )
 
   Load-Types
