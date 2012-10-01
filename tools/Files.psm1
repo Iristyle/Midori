@@ -15,12 +15,19 @@ function Add-AnnotatedContent
     Optional parameter that specifies the Encoding to use for files.
     Default is UTF8.  Other options are Unicode, UTF7, UTF32, ASCII, Default,
     OEM and BigEndianUnicode.
+  .Parameter Include
+    Optional parameter that can specify a filter for the files.
+    Uses the same syntax as the Get-ChildItem cmdlet.
+
+    Retrieves only the specified items. The value of this parameter
+    qualifies the Path parameter. Enter a path element or pattern,
+    such as "*.txt". Wildcards are permitted.
   .Example
     Add-AnnotatedContent -Path c:\test -Destination c:\bar\test.txt
 
     Description
     -----------
-    Finds all files in c:\test, and concatenates them to c:\bar\test.txt, 
+    Finds all files in c:\test, and concatenates them to c:\bar\test.txt,
     adding annotations for each directory and each file into the resulting
     file.  Uses default encoding of UTF8.
   .Example
@@ -28,9 +35,17 @@ function Add-AnnotatedContent
 
     Description
     -----------
-    Finds all files in c:\foo and c:\bar, and concatenates them to 
+    Finds all files in c:\foo and c:\bar, and concatenates them to
     c:\baz.txt, adding annotations for each directory and each file into the
     resulting file.  Uses default encoding of UTF8.
+  .Example
+      Add-AnnotatedContent -Path . -Include *.sql -Destination c:\s.sql
+
+    Description
+    -----------
+    Finds *.sql files in subdirs of current dir, and concatenates them to
+    c:\s.sql, adding annotations for each directory and each file into
+    the resulting file.  Uses default encoding of UTF8.
   #>
   [CmdletBinding()]
   param(
@@ -47,30 +62,61 @@ function Add-AnnotatedContent
     [string]
     [ValidateSet('Unicode', 'UTF7', 'UTF8', 'UTF32', 'ASCII',
       'BigEndianUnicode', 'Default', 'OEM')]
-    $Encoding = 'UTF8'
+    $Encoding = 'UTF8',
+
+    [Parameter(Mandatory=$false)]
+    [string[]]
+    $Include = $null
   )
   process
   {
+    #handling both pipeline and non-pipeline calls
+    if ($_ -eq $null) { $_ = $Path }
+
+    $_ |
+    %{
+      $root = (Get-Item $_).FullName
+      $params = @{ Path = $_; Recurse = $true }
+      if ($include -ne $null) { $params.Include = $include }
+
+      $files = Get-ChildItem @params
+      $directories = $files |
+        Select -ExpandProperty DirectoryName -Unique |
+        Sort-Object
+
+      $directories |
+      % {
+        $dir = $_
+        Write-Verbose "Parsing $dir"
+        $dirName = $dir.Replace($root, '')
+        if ($dirName -eq '') { $dirName = '.' }
+        else { $dirName = $dirName.Substring(1) }
 @"
 /**************************************************
-* Folder: $_
+* Folder: $dirName
 ***************************************************/
 
 "@ | Out-File $Destination -Append -Encoding $Encoding
 
-    $files = @()
-    Get-ChildItem $_ -Recurse |
-      % {
-        $files += $_.Name
+        $added = @()
+
+        $files |
+          ? { $_.DirectoryName -eq $dir } |
+          % {
 @"
 --File Name: $($_.Name)
 
 $([System.IO.File]::ReadAllText($_.FullName))
 
 "@ | Out-File $Destination -Append -Encoding $Encoding
-      }
 
-    "Added files $($files -join ' ') from $_ to $Destination" 
+            $added += $_.Name
+          }
+
+        "Added files $($added -join ' ') from $dirName to $Destination"
+
+      }
+    }
   }
 }
 
