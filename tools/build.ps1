@@ -9,16 +9,24 @@ function Get-Batchfile ($file)
 
 function VsVars32($version = '10.0')
 {
-  $key = if ([intptr]::size -eq 8)
+  $name = "Psake-ReadVsVars-$version"
+  $readVersion = Get-Variable -Scope Global -Name $name `
+    -ErrorAction SilentlyContinue
+
+  #continually jamming stuff into PATH is *not* cool ;0
+  if ($readVersion) { return }
+
+  Write-Host "Reading VSVars for $version"
+  $key = if ([IntPtr]::size -eq 8)
     { "HKLM:SOFTWARE\Wow6432Node\Microsoft\VisualStudio\$version" }
   else
     { "HKLM:SOFTWARE\Microsoft\VisualStudio\$version" }
 
   $VsKey = Get-ItemProperty $key
-  $VsInstallPath = [IO.Path]::GetDirectoryName($VsKey.InstallDir)
-  $VsToolsDir = Join-Path ([IO.Path]::GetDirectoryName($VsInstallPath)) 'Tools'
-  $BatchFile = Join-Path $VsToolsDir 'vsvars32.bat'
+  $VsRootDir = Split-Path $VsKey.InstallDir
+  $BatchFile = Join-Path (Join-Path $VsRootDir 'Tools') 'vsvars32.bat'
   Get-Batchfile $BatchFile
+  Set-Variable -Scope Global -Name $name -Value $true
 }
 
 function Get-CurrentDirectory
@@ -45,7 +53,7 @@ $buildPackageDir = Join-Path (Get-CurrentDirectory) 'packages'
 $sourcePackageDir = Join-Path (Get-CurrentDirectory) '..\src\Packages'
 
 @(@{Id = 'psake'; Version='4.2.0.1'; Dir = $buildPackageDir; NoVersion = $true },
-  @{Id = 'Midori'; Version='0.4.0.0'; Dir = $buildPackageDir; NoVersion = $true },
+  @{Id = 'Midori'; Version='0.4.1.0'; Dir = $buildPackageDir; NoVersion = $true },
   #still require dotnetZip to extract the 7-zip command line, sigh
   @{Id = 'DotNetZip'; Version='1.9.1.8'; Dir = $buildPackageDir; NoVersion = $true },
   @{Id = 'xunit.runners'; Version='1.9.1'; Dir = $buildPackageDir; NoVersion = $true }) |
