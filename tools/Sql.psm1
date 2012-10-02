@@ -840,7 +840,8 @@ function Invoke-SqlFileSmo
 .Parameter Path
   The name of the script file to run.
 .Parameter Database
-  The name of the database to connect to.
+  The name of the database instance to connect to.  Note that is
+  InstanceName in the other cmdlets and will be renamed in a future ver.
 .Parameter UserName
   The username used to connect to the database.
 .Parameter Password
@@ -854,9 +855,11 @@ function Invoke-SqlFileSmo
   otherwise 80
 
   Optional width of output strings.
+.Parameter InitialCatalog
+  Specifies the name of the SQL Database to connect to
 .Example
-  Invoke-SqlFileSmo -Path .\foo.sql -Database FC0001 -UserName sa `
-    -Password secret -UseTransaction
+  Invoke-SqlFileSmo -Path .\foo.sql -Database MyDb -UserName sa `
+    -Password secret -UseTransaction -InstanceName '.\SQLEXPRESS'
 
   Description
   -----------
@@ -903,8 +906,9 @@ function Invoke-SqlFileSmo
   $Width = if ($Width -is [ScriptBlock]) { [int](&$Width) }
     else { [int]$Width }
 
-  Write-Host -ForeGroundColor Magenta `
-    "`n`n[START] - Running $Path against $Database $(if ($UseTransaction) { 'with transactions' } ) $(if ($InitialCatalog -ne 'master') { "on database $InitialCatalog" })"
+  $msg = "`n`n[START] - Running $Path against $Database on db $InitialCatalog "
+  if ($UseTransaction) { $msg += 'with transactions' }
+  Write-Host -ForeGroundColor Magenta $msg
 
   $eventIds = @()
   $serverConnection = $null
