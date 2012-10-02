@@ -2,7 +2,7 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Midori</id>
-    <version>0.4.2.0</version>
+    <version>0.4.3.0</version>
     <title>Midori - Sweeter Psake builds</title>
     <authors>Ethan Brown</authors>
     <owners>Ethan Brown</owners>
@@ -20,6 +20,7 @@
     </description>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <releaseNotes>
+        * 0.4.3.0 Added NoDetach parameter to Copy-SqlDatabase
         * 0.4.2.0 Invoke-SqlFileSmo gains a InstanceName parameter
         * 0.4.1.0 minor bugfixes to XUnit runner and Add-AnnotatedContent
         * 0.4.0.0 replaces DotNetZip with 7z.exe for New-ZipFile
