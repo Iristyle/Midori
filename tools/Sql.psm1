@@ -700,6 +700,9 @@ function Copy-SqlDatabase
   MSSQL$SQLEXPRESS if left unspecified.
 .Parameter InstanceName
   The name of the SQL server instance. By default, .\SQLEXPRESS
+.Parameter NoDetach
+  When using the default BackupRestore copy method, this will disable the
+  new database from being detached after creation.
 .Example
   Copy-SqlDatabase -DatabaseName MyDatabase `
     -DestinationDatabasePath c:\db -DestinationDatabaseName MyDatabase2
@@ -737,7 +740,11 @@ function Copy-SqlDatabase
 
     [Parameter(Mandatory=$false)]
     [string]
-    $InstanceName = '.\SQLEXPRESS'
+    $InstanceName = '.\SQLEXPRESS',
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $NoDetach=$false
   )
 
 
@@ -751,7 +758,8 @@ function Copy-SqlDatabase
       Restore-SqlDatabase -BackupPath $BackupPath `
         -DestinationDatabasePath $DestinationDatabasePath `
         -DestinationDatabaseName $DestinationDatabaseName `
-        -ServiceName $ServiceName -InstanceName $InstanceName
+        -ServiceName $ServiceName -InstanceName $InstanceName `
+        -NoDetach:$NoDetach
       Remove-Item $BackupPath
     }
     'Transfer'
