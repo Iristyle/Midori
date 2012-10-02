@@ -227,6 +227,8 @@ function New-SqlDatabase
 
     #restore multiuser access
     $options.UserAccess = $UserAccess
+
+    $options.Alter()
   }
   finally
   {
