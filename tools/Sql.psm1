@@ -998,11 +998,13 @@ function Invoke-SqlFileSmo
   }
   catch [Exception]
   {
+    Write-Host -ForeGroundColor Red 'DB update completed with errors.'
     if ($UseTransaction -and ($serverConnection -ne $null))
     {
       Write-Host 'Rolling back transaction...'
       $serverConnection.RollBackTransaction()
     }
+    Write-Host -ForeGroundColor Red $_.ToString()
   }
   finally
   {
