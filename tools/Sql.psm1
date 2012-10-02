@@ -871,7 +871,7 @@ function Invoke-SqlFileSmo
 
     [Parameter(Mandatory=$true)]
     [string]
-    $Database,
+    $Database = '.\SQLEXPRESS',
 
     [Parameter(Mandatory=$true)]
     [string]
@@ -891,7 +891,11 @@ function Invoke-SqlFileSmo
 
     [Parameter(Mandatory=$false)]
     $Width = { if ($Host -and $Host.UI -and $Host.UI.RawUI)
-      { $Host.UI.RawUI.BufferSize.Width } else { 80 }}
+      { $Host.UI.RawUI.BufferSize.Width } else { 80 }},
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $InitialCatalog = 'master'
   )
 
   Load-Types
@@ -900,7 +904,7 @@ function Invoke-SqlFileSmo
     else { [int]$Width }
 
   Write-Host -ForeGroundColor Magenta `
-    "`n`n[START] - Running $Path against $Database $(if ($UseTransaction) { 'with transactions' } )"
+    "`n`n[START] - Running $Path against $Database $(if ($UseTransaction) { 'with transactions' } ) $(if ($InitialCatalog -ne 'master') { "on database $InitialCatalog" })"
 
   $eventIds = @()
   $serverConnection = $null
@@ -942,6 +946,12 @@ function Invoke-SqlFileSmo
     $params.EventName = 'InfoMessage'
     $params.Action = { Write-Verbose "$($Event.SourceEventArgs)" }
     $eventIds += (Register-ObjectEvent @params).Id
+
+    if ($InitialCatalog -ne 'master')
+    {
+      Write-Host "Setting initial catalog to $InitialCatalog"
+      $server.ConnectionContext.DatabaseName = $InitialCatalog
+    }
 
     if ($UseTransaction)
     {
