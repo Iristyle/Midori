@@ -701,8 +701,8 @@ function Copy-SqlDatabase
 .Parameter InstanceName
   The name of the SQL server instance. By default, .\SQLEXPRESS
 .Parameter NoDetach
-  When using the default BackupRestore copy method, this will disable the
-  new database from being detached after creation.
+  When using the default BackupRestore copy method, this will disable
+  the new database from being detached after creation.
 .Example
   Copy-SqlDatabase -DatabaseName MyDatabase `
     -DestinationDatabasePath c:\db -DestinationDatabaseName MyDatabase2
