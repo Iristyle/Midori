@@ -837,7 +837,7 @@ function Remove-SqlDatabase
   {
     $server = New-Object Microsoft.SqlServer.Management.Smo.Server($InstanceName)
 
-    if($Force)
+    if ($Force)
     {
       $server.KillAllProcesses($DatabaseName)
       $server.KillDatabase($DatabaseName)
