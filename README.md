@@ -81,7 +81,7 @@ $buildPackageDir = Join-Path (Get-CurrentDirectory) 'packages'
 $sourcePackageDir = Join-Path (Get-CurrentDirectory) '..\src\Packages'
 
 @(@{Id = 'psake'; Version='4.2.0.1'; Dir = $buildPackageDir; NoVersion = $true },
-  @{Id = 'Midori'; Version='0.4.3.0'; Dir = $buildPackageDir; NoVersion = $true },
+  @{Id = 'Midori'; Version='0.4.4.0'; Dir = $buildPackageDir; NoVersion = $true },
   #still require dotnetZip to extract the 7-zip command line, sigh
   @{Id = 'DotNetZip'; Version='1.9.1.8'; Dir = $buildPackageDir; NoVersion = $true },
   @{Id = 'xunit.runners'; Version='1.9.1'; Dir = $buildPackageDir; NoVersion = $true }) |
@@ -216,6 +216,10 @@ setting up integration tests or similar.
 
 ### Release Notes
 
+* 0.4.4.0 - Bug fixes for loading SQL module in PowerShell v3
+Invoke-SqlFileSmo ate exceptions instead of rethrowing them
+New-SqlDatabase was not honoring UserAccess setting
+Remove-SqlDatabase adds -Force switch
 * 0.4.3.0 - Added NoDetach parameter to Copy-SqlDatabase
 * 0.4.2.0 - Invoke-SqlFileSmo gains a InstanceName parameter
 * 0.4.1.0 - Minor release fixes a bug in XUnit cmdlet that merges output
