@@ -1023,7 +1023,7 @@ function Invoke-SqlFileSmo
       Write-Host 'Rolling back transaction...'
       $serverConnection.RollBackTransaction()
     }
-    Write-Host -ForeGroundColor Red $_.ToString()
+    Write-Error $_.ToString()
   }
   finally
   {
