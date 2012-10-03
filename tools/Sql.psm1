@@ -1001,6 +1001,8 @@ function Invoke-SqlFileSmo
       Write-Host 'Rolling back transaction...'
       $serverConnection.RollBackTransaction()
     }
+
+    throw
   }
   finally
   {
