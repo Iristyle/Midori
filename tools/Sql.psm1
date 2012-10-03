@@ -9,8 +9,8 @@ function Load-Types
 {
   if ($script:typesLoaded) { return }
 
-  #Requires SQL SMO goop - http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=16177
-  #requires MSXML 6, SQL CLR types and SQL Native Client
+  #needs SQL SMO goop - http://www.microsoft.com/download/en/details.aspx?displaylang=en&id=16177
+  #needs MSXML 6, SQL CLR types and SQL Native Client
   #9.0 needed for 2005, 10.0 needed for 2008
   Add-Type -AssemblyName 'System.Data',
     ('Microsoft.SqlServer.ConnectionInfo, Version=10.0.0.0, Culture=neutral, ' +
