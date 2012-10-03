@@ -227,6 +227,8 @@ function New-SqlDatabase
 
     #restore multiuser access
     $options.UserAccess = $UserAccess
+
+    $options.Alter()
   }
   finally
   {
@@ -796,6 +798,11 @@ function Remove-SqlDatabase
   MSSQL$SQLEXPRESS if left unspecified.
 .Parameter InstanceName
   The name of the SQL server instance. By default, .\SQLEXPRESS
+.Parameter Force
+  Optionally forces detachment of the database.  When leaving a DB in
+  multi-user mode, it is possible to have lingering connections from
+  integration tests.  This option will ensure detachment of the DB by
+  forcibly killing all active processes on the database.
 .Example
   Remove-SqlDatabase -DatabaseName MyDatabase
 
@@ -815,7 +822,11 @@ function Remove-SqlDatabase
 
     [Parameter(Mandatory=$false)]
     [string]
-    $InstanceName = '.\SQLEXPRESS'
+    $InstanceName = '.\SQLEXPRESS',
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $Force = $false
   )
 
   Load-Types
@@ -825,7 +836,17 @@ function Remove-SqlDatabase
   try
   {
     $server = New-Object Microsoft.SqlServer.Management.Smo.Server($InstanceName)
-    $server.DetachDatabase($DatabaseName, $true)
+
+    if($Force)
+    {
+      $server.KillAllProcesses($DatabaseName)
+      $server.KillDatabase($DatabaseName)
+    }
+    else
+    {
+      $server.DetachDatabase($DatabaseName, $true)
+    }
+
   }
   finally
   {
@@ -996,11 +1017,13 @@ function Invoke-SqlFileSmo
   }
   catch [Exception]
   {
+    Write-Host -ForeGroundColor Red 'DB update completed with errors.'
     if ($UseTransaction -and ($serverConnection -ne $null))
     {
       Write-Host 'Rolling back transaction...'
       $serverConnection.RollBackTransaction()
     }
+    Write-Error $_.ToString()
   }
   finally
   {
