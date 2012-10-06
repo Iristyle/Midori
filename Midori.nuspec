@@ -2,7 +2,7 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Midori</id>
-    <version>0.4.4.0</version>
+    <version>0.4.5.0</version>
     <title>Midori - Sweeter Psake builds</title>
     <authors>Ethan Brown</authors>
     <owners>Ethan Brown</owners>
@@ -17,9 +17,12 @@
         * Jenkins - Download assets stored in S3
         * XUnit - Runs xunit tests and merges nunit output files for build servers, can create standalone xunit project files
         * Misc helpers - Safer transcription, better error logging, create 7z/zip/tar files, and other common usage helpers
+        * Source Control - Retrieve current branch name
     </description>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <releaseNotes>
+        * 0.4.5.0 - Added Get-SqlDatabases cmdlet for listing databases on a server
+        Added Get-BranchName cmdlet to list the current branch
         * 0.4.4.0 - Bug fixes for loading SQL module in PowerShell v3
         Invoke-SqlFileSmo ate exceptions instead of rethrowing them
         New-SqlDatabase was not honoring UserAccess setting
