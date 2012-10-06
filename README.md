@@ -81,7 +81,7 @@ $buildPackageDir = Join-Path (Get-CurrentDirectory) 'packages'
 $sourcePackageDir = Join-Path (Get-CurrentDirectory) '..\src\Packages'
 
 @(@{Id = 'psake'; Version='4.2.0.1'; Dir = $buildPackageDir; NoVersion = $true },
-  @{Id = 'Midori'; Version='0.4.4.0'; Dir = $buildPackageDir; NoVersion = $true },
+  @{Id = 'Midori'; Version='0.4.5.0'; Dir = $buildPackageDir; NoVersion = $true },
   #still require dotnetZip to extract the 7-zip command line, sigh
   @{Id = 'DotNetZip'; Version='1.9.1.8'; Dir = $buildPackageDir; NoVersion = $true },
   @{Id = 'xunit.runners'; Version='1.9.1'; Dir = $buildPackageDir; NoVersion = $true }) |
@@ -213,9 +213,16 @@ setting up integration tests or similar.
     * `Copy-SqlDatabase` - Provides either a backup/restore of an existing
     database, or a transfer.  By default, provides the simpler backup/restore
     which is generally all that would ever be necessary on a build server.
+    * `Get-SqlDatabases` - Lists the database names on a given instance / server.
+* SourceControl - Some helpers for working with distributed source systems such
+as Git or Mercurial.
+    * `Get-BranchName` - Returns the current branch name for the current working
+    directory, should one exist.
 
 ### Release Notes
 
+* 0.4.5.0 - Added Get-SqlDatabases cmdlet for listing databases on a server
+Added Get-BranchName cmdlet to list the current branch
 * 0.4.4.0 - Bug fixes for loading SQL module in PowerShell v3
 Invoke-SqlFileSmo ate exceptions instead of rethrowing them
 New-SqlDatabase was not honoring UserAccess setting
