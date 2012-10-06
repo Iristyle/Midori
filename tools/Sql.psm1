@@ -854,6 +854,71 @@ function Remove-SqlDatabase
   }
 }
 
+function Get-SqlDatabases
+{
+<#
+.Synopsis
+  Will read the list of databases from a given server instance.
+.Description
+  The given service is checked to ensure it's running and then the script
+  is executed, to get the list of databases.
+
+  Requires that SMO and some SQL server be installed on the local machine
+.Parameter ServiceName
+  The name of the SQL Server service name - will default to
+  MSSQL$SQLEXPRESS if left unspecified.
+.Parameter InstanceName
+  The name of the SQL server instance. By default, .\SQLEXPRESS
+.Parameter IncludeSystem
+  Optionally includes the system databases in the list as well.
+.Example
+  Get-SqlDatabases
+
+  Description
+  -----------
+  Will use the default localhost SQLEXPRESS instance and will list all
+  attached databases.
+.Example
+  Get-SqlDatabases -IncludeSystem
+
+  Description
+  -----------
+  Will use the default localhost SQLEXPRESS instance and will list all
+  attached databases, including system databases such as master.
+
+#>
+  param(
+    [Parameter(Mandatory=$false)]
+    [string]
+    $ServiceName = 'MSSQL$SQLEXPRESS',
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $InstanceName = '.\SQLEXPRESS',
+
+    [Parameter(Mandatory=$false)]
+    [switch]
+    $IncludeSystem = $false
+  )
+
+  Load-Types
+  Start-ServiceAndWait $ServiceName
+
+  Write-Host "Listing databases on $InstanceName"
+  try
+  {
+    $server = New-Object Microsoft.SqlServer.Management.Smo.Server($InstanceName)
+
+    return $server.Databases |
+      ? { if (!$IncludeSystem) { !$_.IsSystemObject } else { $true } } |
+      Select -ExpandProperty Name
+  }
+  finally
+  {
+    if ($server) { $server.ConnectionContext.Disconnect() }
+  }
+}
+
 function Invoke-SqlFileSmo
 {
 <#
@@ -1048,4 +1113,4 @@ function Invoke-SqlFileSmo
 
 Export-ModuleMember -Function New-SqlDatabase, Invoke-SqlFileSmo,
   Remove-SqlDatabase, Copy-SqlDatabase, Transfer-SqlDatabase, Backup-SqlDatabase,
-  Restore-SqlDatabase
+  Restore-SqlDatabase, Get-SqlDatabases
