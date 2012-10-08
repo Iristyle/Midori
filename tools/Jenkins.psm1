@@ -8,6 +8,20 @@ function Load-Types
   $script:typesLoaded = $true
 }
 
+function Get-CurrentDirectory
+{
+  $thisName = $MyInvocation.MyCommand.Name
+  [IO.Path]::GetDirectoryName((Get-Content function:$thisName).File)
+}
+
+function Load-Dependencies
+{
+  if (!(Get-ChildItem Function:\Get-NetworkTime -ErrorAction SilentlyContinue))
+  {
+    Import-Module (Join-Path (Get-CurrentDirectory) 'Network.psm1')
+  }
+}
+
 function Get-S3Url
 {
   param
@@ -212,13 +226,20 @@ function Get-JenkinsS3Build
   }
   else
   {
+    Load-Dependencies
+    $expireDate = (Get-Date).AddMinutes(15)
+    try { $expireDate = (Get-NetworkTime).NtpTime.AddMinutes(15) }
+    catch {}
+
     $params = @{
       Server = "https://s3.amazonaws.com"
       BucketPath = "/$BucketName/$fileName"
       AccessKey = $AccessKey
       SecretKey = $SecretKey
-      ExpireDate = [DateTime]::Now.AddMinutes(15)
+      ExpireDate = $expireDate
     }
+
+    Write-Verbose ($params | Out-String)
 
     $url = Get-S3Url @params
 
