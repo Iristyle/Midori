@@ -218,6 +218,9 @@ setting up integration tests or similar.
 as Git or Mercurial.
     * `Get-BranchName` - Returns the current branch name for the current working
     directory, should one exist.
+* Network - some helpers for common network tasks
+    * `Get-NetworkTime` - Returns a NTP data structure that can be used to do
+    time sensitive synchronizations.
 
 ### Release Notes
 
