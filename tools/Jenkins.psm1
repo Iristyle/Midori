@@ -1,3 +1,5 @@
+#Requires -Version 3.0
+
 $script:typesLoaded = $false
 function Load-Types
 {
@@ -51,6 +53,47 @@ function Get-S3Url
     "?AWSAccessKeyId=$AccessKey&Expires=$expires&Signature=$urlEncoded"
 }
 
+function Get-PreciseJobName
+{
+  param
+  (
+    [Parameter(Mandatory=$true)]
+    [string]
+    $Job,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $BuildServerUrl,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $UserName,
+
+    [Parameter(Mandatory=$true)]
+    [string]
+    $Password
+  )
+
+  $params = @{
+    Uri = "$BuildServerUrl/api/json";
+    Headers = @{
+      Authorization = 'Basic ' + [Convert]::ToBase64String(
+        [Text.Encoding]::ASCII.GetBytes("$UserName`:$Password"));
+    }
+    ContentType = 'application/json';
+  }
+  $jobs = Invoke-RestMethod @params
+
+  Write-Verbose ($jobs | Out-String)
+
+  $Job = $jobs.Jobs |
+    ? { $_.name.Equals($Job, [StringComparison]::CurrentCultureIgnoreCase) } |
+    Select -ExpandProperty Name -First 1
+
+  if (!$Job) { throw "Could not find job $Job" }
+  return $Job
+}
+
 function Get-LatestBuildId
 {
   param
@@ -79,16 +122,21 @@ function Get-LatestBuildId
     $Password
   )
 
-  $creds = [Convert]::ToBase64String(
-    [Text.Encoding]::ASCII.GetBytes("$UserName`:$Password"))
-  $client = New-Object Net.WebClient
-  $client.Headers.Add('Authorization', "Basic $creds")
-  $id = $client.DownloadString("$buildServerUrl/job/$Job/$JobResult/buildNumber")
+  $params = @{
+    Uri = "$BuildServerUrl/job/$Job/$JobResult/buildNumber";
+    Headers = @{
+      Authorization = 'Basic ' + [Convert]::ToBase64String(
+        [Text.Encoding]::ASCII.GetBytes("$UserName`:$Password"));
+    }
+    ContentType = 'application/json';
+  }
+
+  $Id = Invoke-RestMethod @params
   if (-not $Id) { throw 'Could not resolve id for this job type'}
 
   Write-Host -ForeGroundColor Magenta `
     "Found latest build ID: $id of type $JobResult for $Job"
-  $id
+  $Id
 }
 
 function Get-JenkinsS3Build
@@ -115,6 +163,8 @@ function Get-JenkinsS3Build
 
   Note that this cmdlet does not perform temp directory cleanup at this
   time.
+
+  Note that S3 may return a 403 error if the job name is not cased
 .Parameter BuildServerUrl
   A url such as https://build.server.com - should be prefixed with http
   or https as appropriate
@@ -205,15 +255,18 @@ function Get-JenkinsS3Build
     $SecretKey
   )
 
+  $buildIdParams = @{
+    Job = $Job;
+    BuildServerUrl =  $BuildServerUrl;
+    UserName = $BuildServerUser;
+    Password = $BuildServerPassword;
+  }
+  #case is critical for S3
+  $Job = Get-PreciseJobName @buildIdParams
+
   if ($PsCmdlet.ParameterSetName -eq 'type')
   {
-    $buildIdParams = @{
-      Job = $Job;
-      JobResult = $JobResult;
-      BuildServerUrl =  $BuildServerUrl;
-      UserName = $BuildServerUser;
-      Password = $BuildServerPassword;
-    }
+    $buildIdParams.JobResult = $JobResult
     Write-Host "Querying Jenkins for $JobResult id of $Job"
     $Id = Get-LatestBuildId @buildIdParams
   }
