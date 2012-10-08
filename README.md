@@ -81,15 +81,15 @@ $buildPackageDir = Join-Path (Get-CurrentDirectory) 'packages'
 $sourcePackageDir = Join-Path (Get-CurrentDirectory) '..\src\Packages'
 
 @(@{Id = 'psake'; Version='4.2.0.1'; Dir = $buildPackageDir; NoVersion = $true },
-  @{Id = 'Midori'; Version='0.4.5.0'; Dir = $buildPackageDir; NoVersion = $true },
+  @{Id = 'Midori'; Version='0.5.0.0'; Dir = $buildPackageDir; NoVersion = $true },
   #still require dotnetZip to extract the 7-zip command line, sigh
   @{Id = 'DotNetZip'; Version='1.9.1.8'; Dir = $buildPackageDir; NoVersion = $true },
   @{Id = 'xunit.runners'; Version='1.9.1'; Dir = $buildPackageDir; NoVersion = $true }) |
   % {
-    $nuget = @('install', "$($_.Id)", '-v', "$($_.Version)",
-      '-o', "`"$($_.Dir)`"")
+    $nuget = @('install', "$($_.Id)", '-Version', "$($_.Version)",
+      '-OutputDirectory', "`"$($_.Dir)`"")
     if (-not ([string]::IsNullOrEmpty($_.Source)))
-      { $nuget += '-s', "`"$($_.Source)`"" }
+      { $nuget += '-Source', "`"$($_.Source)`"" }
     if ($_.NoVersion) { $nuget += '-ExcludeVersion' }
     &.\nuget $nuget
   }
@@ -218,9 +218,18 @@ setting up integration tests or similar.
 as Git or Mercurial.
     * `Get-BranchName` - Returns the current branch name for the current working
     directory, should one exist.
+* Network - some helpers for common network tasks
+    * `Get-NetworkTime` - Returns a NTP data structure that can be used to do
+    time sensitive synchronizations.
 
 ### Release Notes
 
+* 0.5.0.0 - Added Get-NetworkTime cmdlet to help with network time syncing
+Get-JenkinsS3Build now uses Get-NetworkTime to avoid issues on client machines
+Get-JenkinsS3Build fixes issues when a user provides the wrongly cased job
+names and gets S3 403 errors
+Jenkins cmdlets now require Powershell v3
+Fixed Nuget 2.1 compatibility issue in 'bootstrap' scripts
 * 0.4.5.0 - Added Get-SqlDatabases cmdlet for listing databases on a server
 Added Get-BranchName cmdlet to list the current branch
 * 0.4.4.0 - Bug fixes for loading SQL module in PowerShell v3
