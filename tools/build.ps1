@@ -58,10 +58,10 @@ $sourcePackageDir = Join-Path (Get-CurrentDirectory) '..\src\Packages'
   @{Id = 'DotNetZip'; Version='1.9.1.8'; Dir = $buildPackageDir; NoVersion = $true },
   @{Id = 'xunit.runners'; Version='1.9.1'; Dir = $buildPackageDir; NoVersion = $true }) |
   % {
-    $nuget = @('install', "$($_.Id)", '-v', "$($_.Version)",
-      '-o', "`"$($_.Dir)`"")
+    $nuget = @('install', "$($_.Id)", '-Version', "$($_.Version)",
+      '-OutputDirectory', "`"$($_.Dir)`"")
     if (-not ([string]::IsNullOrEmpty($_.Source)))
-      { $nuget += '-s', "`"$($_.Source)`"" }
+      { $nuget += '-Source', "`"$($_.Source)`"" }
     if ($_.NoVersion) { $nuget += '-ExcludeVersion' }
     &.\nuget $nuget
   }
