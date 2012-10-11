@@ -58,7 +58,13 @@ function Install-CommunityExtensions
   Install-PsGet
 
   Write-Host "Ensuring PsCx is installed"
-  Install-Module PsCx
+  $params = @{
+    ModuleName = 'Pscx';
+    ModuleUrl = 'https://github.com/Iristyle/psget_repository/raw/pscx-updates/Modules/PSCX/Pscx-2.1.0-RC.zip';
+    Type = 'zip';
+    Update = $true;
+  }
+  Install-Module @params
   Import-Module PsCx
 }
 
