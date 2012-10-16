@@ -221,6 +221,14 @@ as Git or Mercurial.
 * Network - some helpers for common network tasks
     * `Get-NetworkTime` - Returns a NTP data structure that can be used to do
     time sensitive synchronizations.
+* Ini - Helpers for reading and writing INI files, including support for nested
+INI sections such as `[[foo]]`
+    * `Get-IniContent` - Reads an INI file into an OrderedDictionary - the object
+    can be modified like a Hashtable, but preserves ordering for round-tripping
+    through `Out-IniFile`
+    * `Out-IniFile` - Writes an INI file from an OrderedDictionary or Hashtable
+    Powershell 3 users may use:
+     `$config = [ordered]@{ Section = [ordered]@{ Name = 'Value' }}`
 
 ### Release Notes
 
