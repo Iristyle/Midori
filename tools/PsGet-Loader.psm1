@@ -57,7 +57,7 @@ function Install-CommunityExtensions
 
   Install-PsGet
 
-  Write-Host "Ensuring PsCx is installed"
+  #2.1.0 RC fixed in https://github.com/psget/psget/commit/ce8a8a59d9
   Install-Module PsCx
   Import-Module PsCx
 }

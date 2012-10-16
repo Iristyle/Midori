@@ -303,4 +303,4 @@ function Get-NetworkTime
   return $parsed
 }
 
-Export-ModuleMember Get-NetworkTime
+Export-ModuleMember -Function Get-NetworkTime
