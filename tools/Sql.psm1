@@ -39,19 +39,30 @@ function Start-ServiceAndWait
     [Parameter(Mandatory=$false)]
     [int]
     [ValidateRange(1, 30)]
-    $MaximumWaitSeconds = 15
+    $MaximumWaitSeconds = 15,
+
+    [switch]
+    $StopFirst
   )
 
   $service = Get-Service | ? { $_.Name -eq $serviceName }
   if (-not $service) { throw "Service $ServiceName does not exist" }
 
-  if ($service.Status -ne 'Running')
+  if ($StopFirst -or ($service.Status -ne 'Running'))
   {
     $identity = [Security.Principal.WindowsPrincipal] `
       ([Security.Principal.WindowsIdentity]::GetCurrent())
     $isAdmin = $identity.IsInRole(
       [Security.Principal.WindowsBuiltInRole]::Administrator)
-    if (! $isAdmin) { throw "Must be in Administrator role to start service" }
+    if (! $isAdmin)
+      { throw "Must be in Administrator role to start / stop service" }
+
+    if ($StopFirst -and ($service.Status -eq 'Running'))
+    {
+      Write-Host -ForeGroundColor Magenta `
+        "Stopping Service [$serviceName]"
+      $service | Stop-Service
+    }
     $service | Start-Service
     $seconds = 0
     while (($seconds -lt $MaximumWaitSeconds) -and `
@@ -1155,6 +1166,39 @@ function Invoke-SqlFileSmo
   }
 }
 
+function Restart-SqlServer
+{
+<#
+.Synopsis
+  Restarts the given Sql Server Service - waiting to return only once
+  the service has started.
+.Description
+  Requires that SMO and some SQL server be installed on the local machine
+
+  Note that the caller must have Administrative access to restart the
+  services.
+.Parameter ServiceName
+  The name of the SQL Server service name - will default to
+  MSSQL$SQLEXPRESS if left unspecified.
+.Example
+  Restart-SqlServer
+
+  Description
+  -----------
+  Will use the default localhost MSSQL$SQLEXPRESS service, calling
+  Stop-Service, then Start-Service and waiting
+#>
+  param(
+    [Parameter(Mandatory=$false)]
+    [string]
+    $ServiceName = 'MSSQL$SQLEXPRESS'
+  )
+
+  Load-Types
+  Start-ServiceAndWait $ServiceName -StopFirst
+}
+
+
 Export-ModuleMember -Function New-SqlDatabase, Invoke-SqlFileSmo,
   Remove-SqlDatabase, Copy-SqlDatabase, Transfer-SqlDatabase, Backup-SqlDatabase,
-  Restore-SqlDatabase, Get-SqlDatabases, Get-SqlServer
+  Restore-SqlDatabase, Get-SqlDatabases, Get-SqlServer, Restart-SqlServer
