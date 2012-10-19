@@ -2,7 +2,7 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Midori</id>
-    <version>0.5.0.0</version>
+    <version>0.6.0.0</version>
     <title>Midori - Sweeter Psake builds</title>
     <authors>Ethan Brown</authors>
     <owners>Ethan Brown</owners>
@@ -19,9 +19,13 @@
         * Misc helpers - Safer transcription, better error logging, create 7z/zip/tar files, and other common usage helpers
         * Source Control - Retrieve current branch name
         * Network - Read time from a network time server
+        * INI - Read / write INI files
     </description>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <releaseNotes>
+        * 0.6.0.0 - Added INI read/write functionality with Get-IniContent and
+        Out-IniFile
+        Added Get-SqlServer to inspect SQL server instances
         * 0.5.0.0 - Added Get-NetworkTime cmdlet to help with network time syncing
         Get-JenkinsS3Build now uses Get-NetworkTime to avoid issues on client machines
         Get-JenkinsS3Build fixes issues when a user provides the wrongly cased job
