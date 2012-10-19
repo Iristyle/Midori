@@ -2,7 +2,7 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Midori</id>
-    <version>0.6.0.0</version>
+    <version>0.6.1.0</version>
     <title>Midori - Sweeter Psake builds</title>
     <authors>Ethan Brown</authors>
     <owners>Ethan Brown</owners>
@@ -23,6 +23,7 @@
     </description>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <releaseNotes>
+        * 0.6.1.0 - Added Restart-SqlServer cmdlet
         * 0.6.0.0 - Added INI read/write functionality with Get-IniContent and
         Out-IniFile
         Added Get-SqlServer to inspect SQL server instances
