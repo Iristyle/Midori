@@ -919,6 +919,50 @@ function Get-SqlDatabases
   }
 }
 
+function Get-SqlServer
+{
+<#
+.Synopsis
+  Will return Microsoft.SqlServer.Management.Smo.Server for an instance
+.Description
+  The given service is checked to ensure it's running and then the script
+  is executed, to get the server object.
+
+  Requires that SMO and some SQL server be installed on the local machine
+
+  Note that it is the callers responsibility to call
+  ConnectionContext.Disconnect() on the object returned after its done
+  being used.
+.Parameter ServiceName
+  The name of the SQL Server service name - will default to
+  MSSQL$SQLEXPRESS if left unspecified.
+.Parameter InstanceName
+  The name of the SQL server instance. By default, .\SQLEXPRESS
+.Example
+  Get-SqlServer
+
+  Description
+  -----------
+  Will use the default localhost SQLEXPRESS instance and will return
+  a server instance object.
+#>
+  param(
+    [Parameter(Mandatory=$false)]
+    [string]
+    $ServiceName = 'MSSQL$SQLEXPRESS',
+
+    [Parameter(Mandatory=$false)]
+    [string]
+    $InstanceName = '.\SQLEXPRESS'
+  )
+
+  Load-Types
+  Start-ServiceAndWait $ServiceName
+
+  Write-Host "Retrieving SMO server for $InstanceName"
+  return New-Object Microsoft.SqlServer.Management.Smo.Server($InstanceName)
+}
+
 function Invoke-SqlFileSmo
 {
 <#
@@ -1113,4 +1157,4 @@ function Invoke-SqlFileSmo
 
 Export-ModuleMember -Function New-SqlDatabase, Invoke-SqlFileSmo,
   Remove-SqlDatabase, Copy-SqlDatabase, Transfer-SqlDatabase, Backup-SqlDatabase,
-  Restore-SqlDatabase, Get-SqlDatabases
+  Restore-SqlDatabase, Get-SqlDatabases, Get-SqlServer
