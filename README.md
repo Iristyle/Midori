@@ -81,7 +81,7 @@ $buildPackageDir = Join-Path (Get-CurrentDirectory) 'packages'
 $sourcePackageDir = Join-Path (Get-CurrentDirectory) '..\src\Packages'
 
 @(@{Id = 'psake'; Version='4.2.0.1'; Dir = $buildPackageDir; NoVersion = $true },
-  @{Id = 'Midori'; Version='0.5.0.0'; Dir = $buildPackageDir; NoVersion = $true },
+  @{Id = 'Midori'; Version='0.6.0.0'; Dir = $buildPackageDir; NoVersion = $true },
   #still require dotnetZip to extract the 7-zip command line, sigh
   @{Id = 'DotNetZip'; Version='1.9.1.8'; Dir = $buildPackageDir; NoVersion = $true },
   @{Id = 'xunit.runners'; Version='1.9.1'; Dir = $buildPackageDir; NoVersion = $true }) |
@@ -214,6 +214,7 @@ setting up integration tests or similar.
     database, or a transfer.  By default, provides the simpler backup/restore
     which is generally all that would ever be necessary on a build server.
     * `Get-SqlDatabases` - Lists the database names on a given instance / server.
+    * `Get-SqlServer` - Retrieves an SMO database instance
 * SourceControl - Some helpers for working with distributed source systems such
 as Git or Mercurial.
     * `Get-BranchName` - Returns the current branch name for the current working
@@ -232,6 +233,9 @@ INI sections such as `[[foo]]`
 
 ### Release Notes
 
+* 0.6.0.0 - Added INI read/write functionality with Get-IniContent and
+Out-IniFile
+Added Get-SqlServer to inspect SQL server instances
 * 0.5.0.0 - Added Get-NetworkTime cmdlet to help with network time syncing
 Get-JenkinsS3Build now uses Get-NetworkTime to avoid issues on client machines
 Get-JenkinsS3Build fixes issues when a user provides the wrongly cased job
