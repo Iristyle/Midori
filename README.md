@@ -237,12 +237,15 @@ INI sections such as `[[foo]]`
     beneath a given directory, writing errors if the versions are not matched
     * `Get-NuGetDependencyPackageVersions` - Reads all packages.config files
     beneath a given directory
+    * `Find-NuGetPackages` - Searches a given Nuget feed source for packages
+    matching a given substring.
 
 ### Release Notes
 
 #### 0.7.0.0
 * Added Test-NuGetDependencyPackageVersions cmdlet
 * Added Get-NuGetDependencyPackageVersions cmdlet
+* Added Find-NuGetPackages cmdlet
 
 #### 0.6.1.0
 * Added Restart-SqlServer cmdlet
