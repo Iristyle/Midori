@@ -235,35 +235,59 @@ INI sections such as `[[foo]]`
 
 ### Release Notes
 
-* 0.6.1.0 - Added Restart-SqlServer cmdlet
-* 0.6.0.0 - Added INI read/write functionality with Get-IniContent and
+#### 0.6.1.0
+* Added Restart-SqlServer cmdlet
+
+#### 0.6.0.0
+* Added INI read/write functionality with Get-IniContent and
 Out-IniFile
-Added Get-SqlServer to inspect SQL server instances
-* 0.5.0.0 - Added Get-NetworkTime cmdlet to help with network time syncing
-Get-JenkinsS3Build now uses Get-NetworkTime to avoid issues on client machines
-Get-JenkinsS3Build fixes issues when a user provides the wrongly cased job
+* Added Get-SqlServer to inspect SQL server instances
+
+#### 0.5.0.0
+* Added Get-NetworkTime cmdlet to help with network time syncing
+* Get-JenkinsS3Build now uses Get-NetworkTime to avoid issues on client machines
+* Get-JenkinsS3Build fixes issues when a user provides the wrongly cased job
 names and gets S3 403 errors
-Jenkins cmdlets now require Powershell v3
-Fixed Nuget 2.1 compatibility issue in 'bootstrap' scripts
-* 0.4.5.0 - Added Get-SqlDatabases cmdlet for listing databases on a server
-Added Get-BranchName cmdlet to list the current branch
-* 0.4.4.0 - Bug fixes for loading SQL module in PowerShell v3
-Invoke-SqlFileSmo ate exceptions instead of rethrowing them
-New-SqlDatabase was not honoring UserAccess setting
-Remove-SqlDatabase adds -Force switch
-* 0.4.3.0 - Added NoDetach parameter to Copy-SqlDatabase
-* 0.4.2.0 - Invoke-SqlFileSmo gains a InstanceName parameter
-* 0.4.1.0 - Minor release fixes a bug in XUnit cmdlet that merges output
-Improved Add-AnnotatedContent so that it now has an -Include switch to
+* Jenkins cmdlets now require Powershell v3
+* Fixed Nuget 2.1 compatibility issue in 'bootstrap' scripts
+
+#### 0.4.5.0
+* Added Get-SqlDatabases cmdlet for listing databases on a server
+* Added Get-BranchName cmdlet to list the current branch
+
+#### 0.4.4.0
+* Bug fixes for loading SQL module in PowerShell v3
+* Invoke-SqlFileSmo ate exceptions instead of rethrowing them
+* New-SqlDatabase was not honoring UserAccess setting
+* Remove-SqlDatabase adds -Force switch
+
+#### 0.4.3.0
+* Added NoDetach parameter to Copy-SqlDatabase
+
+#### 0.4.2.0
+* Invoke-SqlFileSmo gains a InstanceName parameter
+
+#### 0.4.1.0
+* Minor release fixes a bug in XUnit cmdlet that merges output
+* Improved Add-AnnotatedContent so that it now has an -Include switch to
 limit the extensions of the given files to concatenate
-Fixed Add-AnnotatedContent so that it doesn't have to be run in Pipeline
-* 0.4.0.0 - Reworked zipping support so that it uses 7z.exe/7za.exe behind
+* Fixed Add-AnnotatedContent so that it doesn't have to be run in Pipeline
+
+#### 0.4.0.0
+* Reworked zipping support so that it uses 7z.exe/7za.exe behind
 the scenes instead of DotNetZip as there were performance / memory issues with
-DotNetZip being used inside of PowerShell.  All SMO server connections Disconnect()
-* 0.3.0.0 - After much trial and error, added additional Sql cmdlets for backup/
-restore, transfer, and detachment.  Minor tweaks to zip functionality / output.
-* 0.2.0.0 - Added [XUnit.NET](http://xunit.codeplex.com/) support
-* 0.1.0.0 - Initial release
+DotNetZip being used inside of PowerShell.
+* All SMO server connections Disconnect()
+
+#### 0.3.0.0
+* After much trial and error, added additional Sql cmdlets for backup/
+restore, transfer, and detachment.
+* Minor tweaks to zip functionality / output.
+
+#### 0.2.0.0
+* Added [XUnit.NET](http://xunit.codeplex.com/) support
+
+#### 0.1.0.0 - Initial release
 
 ### Future Improvements
 
