@@ -232,8 +232,17 @@ INI sections such as `[[foo]]`
     * `Out-IniFile` - Writes an INI file from an OrderedDictionary or Hashtable
     Powershell 3 users may use:
      `$config = [ordered]@{ Section = [ordered]@{ Name = 'Value' }}`
+* Nuget - Helpers for dealing with NuGet packages
+    * `Test-NuGetDependencyPackageVersions` - Reads all packages.config files
+    beneath a given directory, writing errors if the versions are not matched
+    * `Get-NuGetDependencyPackageVersions` - Reads all packages.config files
+    beneath a given directory
 
 ### Release Notes
+
+#### 0.7.0.0
+* Added Test-NuGetDependencyPackageVersions cmdlet
+* Added Get-NuGetDependencyPackageVersions cmdlet
 
 #### 0.6.1.0
 * Added Restart-SqlServer cmdlet
