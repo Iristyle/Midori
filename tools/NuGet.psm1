@@ -28,9 +28,10 @@ function Get-NugetPath
 function Restore-Nuget
 {
   Write-Verbose 'Restore-Nuget'
+  $firstTime = $script:nuget -eq $null
   $nuget = Get-NugetPath
 
-  if ($nuget -ne $null)
+  if ($firstTime -and ($nuget -ne $null))
   {
     &"$nuget" update -Self | Write-Host
     return
@@ -140,6 +141,107 @@ function Find-NuGetPackages
 
   Write-Host "Found $($packages.Count) packages at $source"
   return $packages
+}
+
+function Get-NuGetPackageSpecs
+{
+<#
+.Synopsis
+  Will find all the specified Nuspec files recursively within a
+  particular given Path, and will load their Xml specs into a Hashtable.
+.Description
+  The Nuspec files are read as Xml, and the 'id' of the package is used
+  as the key in the Hashtable.
+
+  There are a couple of caveats here.
+
+  If the metadata id field of the package is set to resolve at build
+  time based on a local csproj using the '$id$' identifier, then the
+  NuGet 'pack' command is run against the csproj to produce a .nupkg
+  file.  This file is then used to determine the id and version fields
+  and the loaded Xml is modified accordingly.
+
+  This requires that the project has been previously built once.  If it
+  has not, then the 'pack' command cannot be run, and the given .nuspec
+  will *not* be added to the returned Hashtable.
+.Parameter Path
+  The optional path fed to Get-ChildItem, that will be used to recurse a given
+  directory structure.
+
+  If left unspecified, the current directory is searched.
+.Example
+  Get-NuGetPackageSpecs
+
+  Description
+  -----------
+  Assuming there are .nuspec files found recursively, the resulting
+  Hashtable will be similar to the following
+
+  Name                           Value
+  ----                           -----
+  Midori                         {Path, Definition}
+
+.Example
+  Get-NuGetPackageSpecs -Path c:\source
+
+  Description
+  -----------
+  Will search c:\source recursively for .nuspec files, building a
+  Hashtable with any found .nuspec files.
+#>
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory = $false)]
+    [string]
+    [ValidateScript({ (Get-Item $_).PSIsContainer })]
+    $Path = (Get-Item .),
+
+    [Parameter(Mandatory = $false)]
+    [string[]]
+    $Include = '*.nuspec'
+  )
+  Write-Verbose "Get-NuGetPackageSpecs running against $Path for $Include"
+
+  $specs = @{}
+
+  Get-ChildItem -Path $Path -Include $Include -Recurse |
+    ? { (Split-Path $_.DirectoryName -Leaf) -ne 'packages' } |
+    % {
+      Write-Verbose "Found package file $_"
+      $spec = [Xml](Get-Content $_)
+      $id = $spec.package.metadata.id
+      # we need the csproj for the metadata *sigh*
+      if ($id -eq '$id$')
+      {
+        Restore-Nuget
+        Push-Location $_.DirectoryName
+        $csproj = $_.Name -replace '\.nuspec$', '.csproj'
+        # HACK: for this to work, the csproj must have been built already
+        Write-Verbose "Building $csproj to retrieve metadata"
+        &$script:nuget pack $csproj | Out-Null
+        Get-Item *.nupkg |
+          Select -ExpandProperty Name -First 1 |
+          Select-String -Pattern '^(.*?)\.(\d+.*)\.nupkg$' -AllMatches |
+          % {
+            $caps = $_.Matches.Captures
+            $id = $caps.Groups[1].Value
+            $spec.package.metadata.id = $id
+            $spec.package.metadata.id = $caps.Groups[2].Value
+          }
+        Pop-Location
+      }
+      if ($id -eq '$id$')
+      {
+        Write-Warning "Could not find id / version for file $_"
+        return
+      }
+      $specs[$id] = @{
+        Path = $_
+        Definition = $spec
+      }
+    }
+
+  return $specs
 }
 
 function Test-NuGetDependencyPackageVersions
@@ -305,4 +407,5 @@ function Get-NuGetDependencyPackageVersions
 }
 
 Export-ModuleMember Test-NuGetDependencyPackageVersions,
-  Get-NuGetDependencyPackageVersions, Find-NuGetPackages
+  Get-NuGetDependencyPackageVersions, Find-NuGetPackages,
+  Get-NuGetPackageSpecs

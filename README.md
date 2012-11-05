@@ -239,6 +239,8 @@ INI sections such as `[[foo]]`
     beneath a given directory
     * `Find-NuGetPackages` - Searches a given Nuget feed source for packages
     matching a given substring.
+    * `Get-NuGetPackageSpecs` - Search a given path for .nuspec files, builds
+    a Hashtable of package id as the key and the Xml as the value
 
 ### Release Notes
 
@@ -246,6 +248,7 @@ INI sections such as `[[foo]]`
 * Added Test-NuGetDependencyPackageVersions cmdlet
 * Added Get-NuGetDependencyPackageVersions cmdlet
 * Added Find-NuGetPackages cmdlet
+* Added Get-NuGetPackageSpecs cmdlet
 
 #### 0.6.1.0
 * Added Restart-SqlServer cmdlet
