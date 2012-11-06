@@ -81,7 +81,7 @@ $buildPackageDir = Join-Path (Get-CurrentDirectory) 'packages'
 $sourcePackageDir = Join-Path (Get-CurrentDirectory) '..\src\Packages'
 
 @(@{Id = 'psake'; Version='4.2.0.1'; Dir = $buildPackageDir; NoVersion = $true },
-  @{Id = 'Midori'; Version='0.6.1.0'; Dir = $buildPackageDir; NoVersion = $true },
+  @{Id = 'Midori'; Version='0.7.0.0'; Dir = $buildPackageDir; NoVersion = $true },
   #still require dotnetZip to extract the 7-zip command line, sigh
   @{Id = 'DotNetZip'; Version='1.9.1.8'; Dir = $buildPackageDir; NoVersion = $true },
   @{Id = 'xunit.runners'; Version='1.9.1'; Dir = $buildPackageDir; NoVersion = $true }) |
@@ -232,38 +232,86 @@ INI sections such as `[[foo]]`
     * `Out-IniFile` - Writes an INI file from an OrderedDictionary or Hashtable
     Powershell 3 users may use:
      `$config = [ordered]@{ Section = [ordered]@{ Name = 'Value' }}`
+* Nuget - Helpers for dealing with NuGet packages
+    * `Test-NuGetDependencyPackageVersions` - Reads all packages.config files
+    beneath a given directory, writing errors if the versions are not matched
+    * `Get-NuGetDependencyPackageVersions` - Reads all packages.config files
+    beneath a given directory
+    * `Find-NuGetPackages` - Searches a given Nuget feed source for packages
+    matching a given substring.
+    * `Get-NuGetPackageSpecs` - Search a given path for .nuspec files, builds
+    a Hashtable of package id as the key and the Xml as the value
+    * `Publish-NuGetPackage` - Publishes a set of packages.  Can specify the
+    source, api key, packages to include and some additional variables.
+    Designed in a build server friendly manner where the source and API key
+    are read automatically from `NUGET_SOURCE` and `NUGET_API_KEY` environment
+    variables.  While this cmdlet can handle .nuspec files that are sidecars
+    to .csproj files that use metadata like `$id$`, its recommended that
+    .csproj files are not configured in this manner as it is more costly to
+    process them.
 
 ### Release Notes
 
-* 0.6.1.0 - Added Restart-SqlServer cmdlet
-* 0.6.0.0 - Added INI read/write functionality with Get-IniContent and
+#### 0.7.0.0
+* Added Test-NuGetDependencyPackageVersions cmdlet
+* Added Get-NuGetDependencyPackageVersions cmdlet
+* Added Find-NuGetPackages cmdlet
+* Added Get-NuGetPackageSpecs cmdlet
+* Added Publish-NuGetPackage cmdlet
+
+#### 0.6.1.0
+* Added Restart-SqlServer cmdlet
+
+#### 0.6.0.0
+* Added INI read/write functionality with Get-IniContent and
 Out-IniFile
-Added Get-SqlServer to inspect SQL server instances
-* 0.5.0.0 - Added Get-NetworkTime cmdlet to help with network time syncing
-Get-JenkinsS3Build now uses Get-NetworkTime to avoid issues on client machines
-Get-JenkinsS3Build fixes issues when a user provides the wrongly cased job
+* Added Get-SqlServer to inspect SQL server instances
+
+#### 0.5.0.0
+* Added Get-NetworkTime cmdlet to help with network time syncing
+* Get-JenkinsS3Build now uses Get-NetworkTime to avoid issues on client machines
+* Get-JenkinsS3Build fixes issues when a user provides the wrongly cased job
 names and gets S3 403 errors
-Jenkins cmdlets now require Powershell v3
-Fixed Nuget 2.1 compatibility issue in 'bootstrap' scripts
-* 0.4.5.0 - Added Get-SqlDatabases cmdlet for listing databases on a server
-Added Get-BranchName cmdlet to list the current branch
-* 0.4.4.0 - Bug fixes for loading SQL module in PowerShell v3
-Invoke-SqlFileSmo ate exceptions instead of rethrowing them
-New-SqlDatabase was not honoring UserAccess setting
-Remove-SqlDatabase adds -Force switch
-* 0.4.3.0 - Added NoDetach parameter to Copy-SqlDatabase
-* 0.4.2.0 - Invoke-SqlFileSmo gains a InstanceName parameter
-* 0.4.1.0 - Minor release fixes a bug in XUnit cmdlet that merges output
-Improved Add-AnnotatedContent so that it now has an -Include switch to
+* Jenkins cmdlets now require Powershell v3
+* Fixed Nuget 2.1 compatibility issue in 'bootstrap' scripts
+
+#### 0.4.5.0
+* Added Get-SqlDatabases cmdlet for listing databases on a server
+* Added Get-BranchName cmdlet to list the current branch
+
+#### 0.4.4.0
+* Bug fixes for loading SQL module in PowerShell v3
+* Invoke-SqlFileSmo ate exceptions instead of rethrowing them
+* New-SqlDatabase was not honoring UserAccess setting
+* Remove-SqlDatabase adds -Force switch
+
+#### 0.4.3.0
+* Added NoDetach parameter to Copy-SqlDatabase
+
+#### 0.4.2.0
+* Invoke-SqlFileSmo gains a InstanceName parameter
+
+#### 0.4.1.0
+* Minor release fixes a bug in XUnit cmdlet that merges output
+* Improved Add-AnnotatedContent so that it now has an -Include switch to
 limit the extensions of the given files to concatenate
-Fixed Add-AnnotatedContent so that it doesn't have to be run in Pipeline
-* 0.4.0.0 - Reworked zipping support so that it uses 7z.exe/7za.exe behind
+* Fixed Add-AnnotatedContent so that it doesn't have to be run in Pipeline
+
+#### 0.4.0.0
+* Reworked zipping support so that it uses 7z.exe/7za.exe behind
 the scenes instead of DotNetZip as there were performance / memory issues with
-DotNetZip being used inside of PowerShell.  All SMO server connections Disconnect()
-* 0.3.0.0 - After much trial and error, added additional Sql cmdlets for backup/
-restore, transfer, and detachment.  Minor tweaks to zip functionality / output.
-* 0.2.0.0 - Added [XUnit.NET](http://xunit.codeplex.com/) support
-* 0.1.0.0 - Initial release
+DotNetZip being used inside of PowerShell.
+* All SMO server connections Disconnect()
+
+#### 0.3.0.0
+* After much trial and error, added additional Sql cmdlets for backup/
+restore, transfer, and detachment.
+* Minor tweaks to zip functionality / output.
+
+#### 0.2.0.0
+* Added [XUnit.NET](http://xunit.codeplex.com/) support
+
+#### 0.1.0.0 - Initial release
 
 ### Future Improvements
 
