@@ -430,6 +430,7 @@ function Invoke-Pack([Hashtable]$specs, [Hashtable]$existingPackages = @{})
 {
   Write-Verbose "Invoke-Pack processing $($specs.Count) specs"
 
+  $packFails = @()
   $specs.GetEnumerator() |
     % {
       $id = $_.Key
@@ -439,10 +440,13 @@ function Invoke-Pack([Hashtable]$specs, [Hashtable]$existingPackages = @{})
       $version = $definition.package.metadata.version
       $csproj = Join-Path $path.DirectoryName ($path.BaseName + '.csproj')
 
+      $packParams = @('pack', '-OutputDirectory', $path.DirectoryName)
+
       if (Test-Path $csproj)
       {
         Write-Verbose "Packing csproj file $csproj for package $id"
-        &$script:nuget pack "$csproj" -Prop Configuration=Release -Exclude '**\*.CodeAnalysisLog.xml'
+        $packParams += $csproj, '-Prop', 'Configuration=Release',
+          '-Exclude', '**\*.CodeAnalysisLog.xml'
       }
       else
       {
@@ -455,8 +459,18 @@ function Invoke-Pack([Hashtable]$specs, [Hashtable]$existingPackages = @{})
             return
           }
         }
-        &$script:nuget pack $path
+        $packParams += $path
       }
+
+      $packDetails = "Packing $id with params: $packParams"
+      &$script:nuget $packParams
+      if ($LASTEXITCODE -ne 0) { $packFails += $packDetails }
+    }
+
+    if ($packFails.Length -gt 0)
+    {
+      Write-Error ("Failed to pack some NuGet spec files`n`n" +
+        ($packFails -join "`n"))
     }
 }
 
@@ -622,22 +636,30 @@ function Publish-NuGetPackage
   Restore-Nuget
   Invoke-Pack @packParams
 
+  $pushFails = @()
   Get-ChildItem -Path $Path -Recurse -Filter *.nupkg |
     % {
-      $pushParams = @($_)
+      $pushParams = @($_.FullName)
       # Use ENV params or whatever has been specified
       if (![string]::IsNullOrEmpty($source))
         { $pushParams += '-Source', $source}
       if (![string]::IsNullOrEmpty($apikey))
         { $pushParams += '-ApiKey', $apikey}
 
-      #TODO: change to Verbose
-      Write-Verbose "Pushing $_ $(if ($source) { "to source $source " })with params: $pushParams"
+      $pushDetails = "Pushing $($_.Fullname) $(if ($source) { "to source $source " })with params: $pushParams"
+      Write-Verbose $pushDetails
 
       &$script:nuget push $pushParams
+      if ($LASTEXITCODE -ne 0) { $pushFails += $pushDetails }
       if (!$KeepPackages)
         { Remove-Item $_ -Force -ErrorAction SilentlyContinue}
     }
+
+  if ($pushFails.Length -gt 0)
+  {
+    Write-Error ("Failed to push some NuGet packages`n`n" +
+      ($pushFails -join "`n"))
+  }
 }
 
 Export-ModuleMember Test-NuGetDependencyPackageVersions,
