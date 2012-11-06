@@ -10,7 +10,7 @@ but also in other scenarios where PowerShell scripts are used for maintenance.
 
 ## Using with Psake
 
-These modules may be imported by modifing the `psake-config.ps1` and adding
+These modules may be imported by modifing the [`psake-config.ps1`][psake-config] and adding
 something like
 
 ```powershell
@@ -25,7 +25,8 @@ dependencies are installed and/or configured.
 A standard [`build.ps1`][build] is included in the directory for convenience that
 bootstraps VsVars32.bat, Nuget and Psake.
 
-[build]: Midori/tools/build.ps1
+[build]: Midori/blob/master/tools/build.ps1
+[psake-config]: https://github.com/psake/psake/blob/master/psake-config.ps1
 
 ### Configuring Under Jenkins
 
