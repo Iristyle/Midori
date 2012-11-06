@@ -104,20 +104,21 @@ function Find-NuGetPackages
 
     [Parameter(Mandatory = $false)]
     [string]
-    $Source
+    [ValidateNotNullOrEmpty()]
+    $Source = 'default sources'
   )
 
-  Write-Verbose "Find-NuGetPackages retrieving package list from $source..."
+  Write-Verbose "Find-NuGetPackages retrieving packages $Name from $Source..."
 
   Restore-Nuget
 
   # TODO: handle -Prerelease
   $listArgs = @()
-  if (![string]::IsNullOrEmpty($source)) { $listArgs += '-Source', $source }
+  if ($PsBoundParameters.Source) { $listArgs += '-Source', $Source }
 
   # HACK: myget bug doesn't return search results for multiple pkgs
   # TODO: remove the myget check once they fix their bug
-  if ($Name -and ($Name.Length -gt 1) -and ($source -notmatch 'myget\.org'))
+  if ($Name -and ($Name.Length -gt 1) -and ($Source -notmatch 'myget\.org'))
     { $listArgs += ($Name -join ', ') }
 
   $listArgs += '-NonInteractive'
@@ -139,7 +140,7 @@ function Find-NuGetPackages
       }
     }
 
-  Write-Host "Found $($packages.Count) packages at $source"
+  Write-Host "Found $($packages.Count) packages at $Source"
   return $packages
 }
 
@@ -198,6 +199,7 @@ function Get-NuGetPackageSpecs
 
     [Parameter(Mandatory = $false)]
     [string[]]
+    [ValidateNotNullOrEmpty()]
     $Include = '*.nuspec'
   )
   Write-Verbose "Get-NuGetPackageSpecs running against $Path for $Include"
@@ -242,6 +244,24 @@ function Get-NuGetPackageSpecs
     }
 
   return $specs
+}
+
+function Test-IsVersionNewer([string]$base, [string]$new)
+{
+  # no base version - let this go through
+  if (!$base) { return $true }
+
+  if ([string]::IsNullOrEmpty($new))
+  {
+    Write-Error 'New version cannot be empty'
+    return $false
+  }
+
+  # TODO: naive impl of SemVer handling since its the exception
+  # always let new SemVers go through
+  if ($new -match '\-.*$') { return $true }
+
+  return [Version]$new -gt [Version]$base
 }
 
 function Test-NuGetDependencyPackageVersions
@@ -406,6 +426,220 @@ function Get-NuGetDependencyPackageVersions
   return $packages
 }
 
+function Invoke-Pack([Hashtable]$specs, [Hashtable]$existingPackages = @{})
+{
+  Write-Verbose "Invoke-Pack processing $($specs.Count) specs"
+
+  $specs.GetEnumerator() |
+    % {
+      $id = $_.Key
+      $path = $_.Value.Path
+      $definition = $_.Value.Definition
+      $baseVersion = $existingPackages.$id #doesn't always exist
+      $version = $definition.package.metadata.version
+      $csproj = Join-Path $path.DirectoryName ($path.BaseName + '.csproj')
+
+      if (Test-Path $csproj)
+      {
+        Write-Verbose "Packing csproj file $csproj for package $id"
+        &$script:nuget pack "$csproj" -Prop Configuration=Release -Exclude '**\*.CodeAnalysisLog.xml'
+      }
+      else
+      {
+        if ($existingPackages -and $baseVersion)
+        {
+          Write-Verbose "Local package $id - version $version / remote $baseVersion"
+          if (!(Test-IsVersionNewer $baseVersion $version))
+          {
+            Write-Host "[SKIP] : Package $id matches server $version"
+            return
+          }
+        }
+        &$script:nuget pack $path
+      }
+    }
+}
+
+function Publish-NuGetPackage
+{
+<#
+.Synopsis
+  Will find all .nuspec files recursively within a specified path, will
+  call nuget pack against each of them, and will publish to the default
+  source, or one specified.
+.Description
+  This can be used to automatically update a Nuget feed from a build
+  server.
+
+  In it's simplest form, it requires no parameters, but allows for a
+  number of configuration switches to customize the process.
+
+  This cmdlet will attemp to determine server package versions for all
+  local packages, and will not push packages that are newer on the
+  server.  This is of particular use to utility repositories with many
+  packages where it may be expensive to pack and push packages
+  unnecessarily.
+
+  The path can be specified, as can a list of specific nuspec ids.
+
+  A package source and api key may be specified to push to a private
+  feed.
+.Parameter Include
+  Optional list of .nuspec file names to use.  The names may end in
+  .nuspec or no extension.  If any of the includes are not found an
+  error is generated.
+.Parameter Path
+  The optional path fed to Get-ChildItem, that will be used to recurse
+  a given directory structure.
+.Parameter Source
+  The optional Nuget source to push the package to.  If not specified,
+  the NUGET_SOURCE environment variable is used, should it exist.
+
+  Otherwise, the default local configuration of 'nuget sources' is used
+.Parameter ApiKey
+  The optional Nuget API Key to use for the package source.  If not
+  specified, the NUGET_API_KEY environment variable is used, should it
+  exist.
+
+  Otherwise, the default local configuration of 'nuget sources' is used.
+.Parameter KeepPackages
+  Optional switch to prevent deletion of packages after a push.
+.Parameter Force
+  Optional swith to ignores heuristics used to compare local to remote
+  versions of packages, and will attempt to force the package up anyway.
+
+  Chances are good that this will fail.
+
+  The default algorithm tries to prevent packing and pushing
+  unnecessarily, so as to save CPU time and bandwidth.
+.Example
+  Publish-NuGetPackage
+
+  Description
+  -----------
+  Will recursively examine the local working directory, looking for
+  NuGet .nuspec files.
+
+  Employs an algorithm to determine if packages need to be pushed and
+  built.
+
+  For those found next to .csproj files that use $id$, 'nuget pack'
+  will be called to determine ids and versions.
+.Example
+  Publish-NuGetPackage -Include 'Foo', 'Bar'
+
+  Description
+  -----------
+  Will recursively examine the local working directory, looking for
+  NuGet .nuspec files 'Foo.nuspec' and 'Bar.nuspec'.
+
+  If these files cannot be found, an error is generated.
+
+  Employs an algorithm to determine if packages need to be pushed and
+  built.
+.Example
+  Publish-NuGetPackage -Path 'c:\source\myproject' -KeepPackages -Force
+
+  Description
+  -----------
+  Will recursively examine c:\source\myproject, looking for NuGet
+  .nuspec files to push and pack.
+
+  Disables the algorithm used to determine if packages should be pushed.
+
+  Keeps .nupkg files on disk after a push instead of deleting them.
+#>
+  [CmdletBinding()]
+  param(
+    [Parameter(Mandatory = $false, Position = 0)]
+    [string[]]
+    $Include,
+
+    [Parameter(Mandatory = $false)]
+    [string]
+    [ValidateScript({ (Get-Item $_).PSIsContainer })]
+    $Path = (Get-Item .),
+
+    [Parameter(Mandatory = $false)]
+    [string]
+    $Source = $Env:NUGET_SOURCE,
+
+    [Parameter(Mandatory = $false)]
+    [string]
+    $ApiKey = $Env:NUGET_API_KEY,
+
+    [Parameter()]
+    [Switch]
+    $KeepPackages,
+
+    [Parameter()]
+    [Switch]
+    $Force
+  )
+
+  if ($Include)
+  {
+    $Include = $Include |
+      % {
+        if ($Include.EndsWith('.nuspec')) { return $_ }
+        return "$($_).nuspec"
+      }
+  }
+
+  Write-Verbose "Publish-NuGetPackage Searching $Path for $Include"
+
+  $specParams = @{ Path = $Path }
+  if ($PsBoundParameters.Include) { $specParams.Include = $Include }
+  $specFiles = Get-NuGetPackageSpecs @specParams
+
+  if ($PsBoundParameters.Include)
+  {
+    $foundFiles = $specFiles.GetEnumerator() | % { $_.Value.Path.Name }
+    $notFound = $Include |
+      ? { $foundFiles -notcontains $_ }
+    if ($notFound.Length -gt 0)
+    {
+      throw "Could not find specs $($notFound -join ',')"
+    }
+  }
+
+  #nothing to do here
+  if ($specFiles.Length -eq 0) { return }
+
+  Write-Verbose "Removing all .nupkg files within $Path"
+  Get-ChildItem -Path $Path -Recurse -Filter *.nupkg |
+    Remove-Item -Force -ErrorAction SilentlyContinue
+
+  $packParams = @{ Specs = $specFiles }
+  if (!$Force)
+  {
+    # use the ids found in our .nuspecs to query with
+    $findParams = @{ Name = $specFiles.Keys }
+    if ($PsBoundParameters.Source) { $findParams.Source = $Source }
+    $packParams.ExistingPackages = Find-NuGetPackages @findParams
+  }
+
+  Restore-Nuget
+  Invoke-Pack @packParams
+
+  Get-ChildItem -Path $Path -Recurse -Filter *.nupkg |
+    % {
+      $pushParams = @($_)
+      # Use ENV params or whatever has been specified
+      if (![string]::IsNullOrEmpty($source))
+        { $pushParams += '-Source', $source}
+      if (![string]::IsNullOrEmpty($apikey))
+        { $pushParams += '-ApiKey', $apikey}
+
+      #TODO: change to Verbose
+      Write-Verbose "Pushing $_ $(if ($source) { "to source $source " })with params: $pushParams"
+
+      &$script:nuget push $pushParams
+      if (!$KeepPackages)
+        { Remove-Item $_ -Force -ErrorAction SilentlyContinue}
+    }
+}
+
 Export-ModuleMember Test-NuGetDependencyPackageVersions,
   Get-NuGetDependencyPackageVersions, Find-NuGetPackages,
-  Get-NuGetPackageSpecs
+  Get-NuGetPackageSpecs, Publish-NuGetPackage

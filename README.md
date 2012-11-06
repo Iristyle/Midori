@@ -241,6 +241,14 @@ INI sections such as `[[foo]]`
     matching a given substring.
     * `Get-NuGetPackageSpecs` - Search a given path for .nuspec files, builds
     a Hashtable of package id as the key and the Xml as the value
+    * `Publish-NuGetPackage` - Publishes a set of packages.  Can specify the
+    source, api key, packages to include and some additional variables.
+    Designed in a build server friendly manner where the source and API key
+    are read automatically from `NUGET_SOURCE` and `NUGET_API_KEY` environment
+    variables.  While this cmdlet can handle .nuspec files that are sidecars
+    to .csproj files that use metadata like `$id$`, its recommended that
+    .csproj files are not configured in this manner as it is more costly to
+    process them.
 
 ### Release Notes
 
@@ -249,6 +257,7 @@ INI sections such as `[[foo]]`
 * Added Get-NuGetDependencyPackageVersions cmdlet
 * Added Find-NuGetPackages cmdlet
 * Added Get-NuGetPackageSpecs cmdlet
+* Added Publish-NuGetPackage cmdlet
 
 #### 0.6.1.0
 * Added Restart-SqlServer cmdlet
