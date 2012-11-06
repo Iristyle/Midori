@@ -26,6 +26,7 @@ $pubParams = @{
   Path = (Get-CurrentDirectory);
   Source = $source;
   ApiKey = $apiKey;
+  Force = $true;
 }
 
 if ($operation -eq 'Pack')

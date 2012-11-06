@@ -160,7 +160,7 @@ session.  This functionality should be built in to PowerShell, but it's not.
 Only remote sessions can be exported to a local session, but not the other
 way around.
 
-#### Sql - Some helpers for working with SQL installs.  
+#### Sql - Some helpers for working with SQL installs.
 
 This can be useful for setting up integration tests or similar.
 
@@ -210,7 +210,7 @@ Powershell 3 users may use:
  `$config = [ordered]@{ Section = [ordered]@{ Name = 'Value' }}`
 
 #### Nuget - Helpers for dealing with NuGet packages
-    
+
 * `Test-NuGetDependencyPackageVersions` - Reads all packages.config files
 beneath a given directory, writing errors if the versions are not matched
 * `Get-NuGetDependencyPackageVersions` - Reads all packages.config files
@@ -229,6 +229,10 @@ to .csproj files that use metadata like `$id$`, its recommended that
 process them.
 
 ### Release Notes
+
+#### 0.7.1.0
+* Better handle exit codes from nuget.exe - propagate within Psake
+* Properly use the OutputDirectory when packing
 
 #### 0.7.0.0
 * Added Test-NuGetDependencyPackageVersions cmdlet
