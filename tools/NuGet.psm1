@@ -374,6 +374,11 @@ function Get-NuGetDependencyPackageVersions
 
   The versions hash contains a list of the full file paths where the
   given version is found.
+
+  Any .csproj files that are present next to the packages.config are
+  also scanned for versions.  The HintPath values are parsed and
+  compared against what is present in packages.config to ensure that no
+  out-of-band version modifications were made improperly.
 .Parameter Path
   The path fed to Get-ChildItem, that will be used to recurse a given
   directory structure
