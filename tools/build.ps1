@@ -49,6 +49,10 @@ else
 }
 
 [Environment]::SetEnvironmentVariable('EnableNuGetPackageRestore','true')
+
+Write-Host 'Loaded environment variables'
+Get-ChildItem Env: | Format-Table -Wrap
+
 $buildPackageDir = Join-Path (Get-CurrentDirectory) 'packages'
 $sourcePackageDir = Join-Path (Get-CurrentDirectory) '..\src\Packages'
 
