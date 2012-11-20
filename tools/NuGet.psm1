@@ -324,7 +324,7 @@ function Test-NuGetDependencyPackageVersions
     [string[]]
     $Exclude = @(),
 
-    [Parameter]
+    [Parameter()]
     [switch]
     $WarnOnly
   )
@@ -583,11 +583,11 @@ function Publish-NuGetPackage
     $ApiKey = $Env:NUGET_API_KEY,
 
     [Parameter()]
-    [Switch]
+    [switch]
     $KeepPackages,
 
     [Parameter()]
-    [Switch]
+    [switch]
     $Force
   )
 
