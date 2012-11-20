@@ -241,12 +241,15 @@ function Out-IniFile
     [string]
     $Encoding = 'Unicode',
 
+    [Parameter()]
     [switch]
     $Append,
 
+    [Parameter()]
     [switch]
     $Force,
 
+    [Parameter()]
     [switch]
     $PassThru
   )

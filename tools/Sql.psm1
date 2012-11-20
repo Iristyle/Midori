@@ -41,6 +41,7 @@ function Start-ServiceAndWait
     [ValidateRange(1, 30)]
     $MaximumWaitSeconds = 15,
 
+    [Parameter()]
     [switch]
     $StopFirst
   )
