@@ -324,7 +324,7 @@ function Test-NuGetDependencyPackageVersions
     [string[]]
     $Exclude = @(),
 
-    [Parameter]
+    [Parameter()]
     [switch]
     $WarnOnly
   )
@@ -374,6 +374,11 @@ function Get-NuGetDependencyPackageVersions
 
   The versions hash contains a list of the full file paths where the
   given version is found.
+
+  Any .csproj files that are present next to the packages.config are
+  also scanned for versions.  The HintPath values are parsed and
+  compared against what is present in packages.config to ensure that no
+  out-of-band version modifications were made improperly.
 .Parameter Path
   The path fed to Get-ChildItem, that will be used to recurse a given
   directory structure
@@ -400,6 +405,27 @@ function Get-NuGetDependencyPackageVersions
   )
 
   $packages = @{}
+
+  $addPackage = {
+    $id, $version, $fileName = $args[0], $args[1], $args[2]
+
+
+    if (!$packages.ContainsKey($id))
+      { $packages[$id] = @{} }
+
+    if ([string]::IsNullOrEmpty($version)) { $version = 'latest' }
+
+    $pkg = $packages[$id]
+    if (!$pkg.ContainsKey($version)) { $pkg[$version] = @() }
+    if ($pkg[$version] -notcontains $fileName)
+    {
+      $pkg[$version] += $fileName
+    }
+  }
+
+  # https://gist.github.com/3012865 - one tweak to capture an extra digit
+  $semVer = '((\d+)\.(\d+)\.(\d+)(\.(\d+)){0,1})(?:-([\dA-Za-z\-]+(?:\.[\dA-Za-z\-]+)*))?(?:\+([\dA-Za-z\-]+(?:\.[\dA-Za-z\-]+)*))?'
+  $pkgRegex = '^(.*?)' + $semver + '\\'
   Get-ChildItem -Path $Path -Recurse -Filter 'packages.config' |
     % {
       $fileName = $_.FullName
@@ -407,19 +433,30 @@ function Get-NuGetDependencyPackageVersions
       $xml = [Xml](Get-Content $fileName)
       if (!$xml.packages.package) { return }
       $xml.packages.package |
+        % { &$addPackage $_.id $_.version $fileName }
+
+      # Examine project files
+      Get-ChildItem -Path $_.DirectoryName -Filter '*.csproj' |
         % {
-          if (!$packages.ContainsKey($_.id))
-            { $packages[$_.id] = @{} }
+          $fileName = $_.FullName
+          Write-Verbose "Examining $fileName"
+          $xml = [Xml](Get-Content $fileName)
+          if (!$xml.Project) { return }
+          $xml.Project.ItemGroup.Reference |
+            ? { $_.HintPath } |
+            % {
+              $hintPath = $_.HintPath
+              # strip down to id and version part of path only
+              ($hintPath -replace '^.*\\packages\\', '') -replace '\\.*$', '' |
+                Select-String $semVer -AllMatches |
+                % {
+                  $version = $_.Matches.Groups[1].Value
+                  $id = $_.Line.Replace('.' + $_.Matches.Value, '')
+                  Write-Verbose "Found version $version and id $id in $hintPath"
 
-          $v = $_.version
-          if ([string]::IsNullOrEmpty($v)) { $v = 'latest' }
-
-          $pkg = $packages[$_.id]
-          if (!$pkg.ContainsKey($v)) { $pkg[$v] = @() }
-          if ($pkg[$v] -notcontains $fileName)
-          {
-            $pkg[$v] += $fileName
-          }
+                  &$addPackage $id $version $fileName
+                }
+            }
         }
     }
 
@@ -583,11 +620,11 @@ function Publish-NuGetPackage
     $ApiKey = $Env:NUGET_API_KEY,
 
     [Parameter()]
-    [Switch]
+    [switch]
     $KeepPackages,
 
     [Parameter()]
-    [Switch]
+    [switch]
     $Force
   )
 
