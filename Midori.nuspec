@@ -2,7 +2,7 @@
 <package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>Midori</id>
-    <version>0.7.1.0</version>
+    <version>0.7.2.0</version>
     <title>Midori - Sweeter Psake builds</title>
     <authors>Ethan Brown</authors>
     <owners>Ethan Brown</owners>
@@ -24,6 +24,9 @@
     </description>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <releaseNotes>
+        * 0.7.2.0 - Allow any of the xunit runners, not just clr4 x64
+        Get-NuGetDependencyPackageVersions now scans .csproj files to ensure that
+        the file referenced in the project is the same as the one in packages.config
         * 0.7.1.0 - Better handle exit codes from nuget.exe - propagate within Psake
         Properly use the OutputDirectory when packing
         * 0.7.0.0 - Added Test-NuGetDependencyPackageVersions cmdlet
