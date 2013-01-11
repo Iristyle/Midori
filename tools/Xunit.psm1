@@ -1,4 +1,6 @@
 $script:XUnitVersionPath = ''
+$script:XUnitDefault = 'xunit.console.clr4.exe'
+$script:XunitRunnerSpec = 'xunit\.console(\.clr4)?(\.x86)?\.exe$'
 
 function Get-CurrentDirectory
 {
@@ -18,7 +20,8 @@ function Set-XUnitPath
     in the event that the assemblies are not hosted in a sibling package
     directory, this provides a mechanism for overloading.
   .Parameter Path
-    The full path to xunit.console.clr4.exe
+    The full path to xunit.console.clr4.exe, xunit.console.exe,
+    xunit.console.clr4.x86.exe or xunit.console.x86.exe
   .Example
     Set-XUnitPath c:\foo\packages\XUnit\lib\tools\xunit.console.clr4.exe
   #>
@@ -29,7 +32,7 @@ function Set-XUnitPath
     [ValidateScript(
     {
       (Test-Path $_) -and (!$_.PSIsContainer) -and
-      ($_.Name -ieq 'xunit.console.clr4.exe')
+      ($_.Name -imatch $script:XunitRunnerSpec)
     })]
     $Path
   )
@@ -48,7 +51,7 @@ function Get-XUnitPath
   $parentDirectory = Split-Path (Split-Path (Get-CurrentDirectory))
 
   $script:XUnitVersionPath =
-    Get-ChildItem -Path $parentDirectory -Filter 'xunit.console.clr4.exe' -Recurse |
+    Get-ChildItem -Path $parentDirectory -Filter $script:XUnitDefault -Recurse |
     ? { $_.DirectoryName.EndsWith('tools') } | Select -First 1 -ExpandProperty FullName
 
   return $script:XUnitVersionPath
@@ -397,6 +400,9 @@ function Invoke-XUnit
   .Parameter XUnitPath
     The optional directory from which XUnit will be loaded.
 
+    Must be xunit.console.clr4.exe, xunit.console.exe,
+    xunit.console.clr4.x86.exe or xunit.console.x86.exe.
+
     If left unspecified, the sibling directories of the Midori package
     will be scanned for anything matching tools\xunit.console.clr4.exe,
     and the first matching file will be used if multiples are found.
@@ -457,7 +463,7 @@ function Invoke-XUnit
     [IO.FileInfo]
     [ValidateScript({
       (Test-Path $_) -and (!$_.PSIsContainer) -and
-      ($_.Name -ieq 'xunit.console.clr4.exe')
+      ($_.Name -imatch $script:XunitRunnerSpec)
     })]
     $XUnitPath = (Get-XUnitPath)
   )
