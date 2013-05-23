@@ -246,6 +246,10 @@ information into the current shell session.
 
 ### Release Notes
 
+#### 0.8.0.0
+* Added Get-VsVars cmdlet
+* Added Set-VsVars cmdlet
+
 #### 0.7.2.0
 * Get-NuGetDependencyPackageVersions now scans .csproj files to ensure that
 the file referenced in the project is the same as the one in `packages.config`
