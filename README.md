@@ -230,6 +230,20 @@ to .csproj files that use metadata like `$id$`, its recommended that
 .csproj files are not configured in this manner as it is more costly to
 process them.
 
+#### VsVars - Helpers for loading Visual Studio command line tools
+
+For automatic import of these into a user's profile, install [Posh-VsVars][]
+with Chocolatey `cinst posh-vsvars`.
+
+* `Get-VsVars` - Will find and load the vsvars32.bat file for the latest Visual
+Studio version installed (or the one specified), and return the values in a
+hash
+* `Set-VsVars` - Will find and load the vsvars32.bat file for the latest Visual
+Studio version installed (or the one specified), and will extract the environment
+information into the current shell session.
+
+[Posh-VsVars]: https://github.com/Iristyle/Posh-VsVars
+
 ### Release Notes
 
 #### 0.7.2.0

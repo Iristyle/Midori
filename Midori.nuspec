@@ -21,6 +21,7 @@
         * Network - Read time from a network time server
         * INI - Read / write INI files
         * Nuget - Find local package versions, publish packages
+        * VsVars - Load Visual Studio tools into current session
     </description>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <releaseNotes>
