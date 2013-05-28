@@ -1,0 +1,30 @@
+should be able to remove redundant Gendarme.Rules.Correctness.EnsureLocalDisposalRule
+should also be able to remove DoNotForgetNotImplementedMethodsRule where there is already a DoNotRaiseExceptionsInUnexpectedLocations (with any luck)
+should be able to remove any other redundancies that overlap with FxCop
+
+
+push all new build script stuff into messaging and hub projects
+
+
+investigate these settings stored in VS projects
+
+    <CodeAnalysisLogFile>bin\Debug\EPS.Hub.Services.Messaging.Tests.Unit.dll.CodeAnalysisLog.xml</CodeAnalysisLogFile>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSetDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\\Rule Sets</CodeAnalysisRuleSetDirectories>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisRuleDirectories>;C:\Program Files (x86)\Microsoft Visual Studio 10.0\Team Tools\Static Analysis Tools\FxCop\\Rules</CodeAnalysisRuleDirectories>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+
+	these are being used
+	<CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+<CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+
+
+OLD notes
+
+Gendarme.msbuild - remove crap aobut AssembliesList / TestAssembliesList
+- Gendarme MsBuild task needs new feature -- to allow considering certain rule violations as failures vs warnings (add support for xml support at cmd line)
+- always remember Gendarme projects must have optimizations disabled to work around CSC bugs
